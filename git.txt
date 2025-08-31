@@ -1,0 +1,12 @@
+git status 
+git add .
+git add <finename>
+git commit -m "commit message here "
+git push 
+git pull origin <name of branch >
+
+git branch // to check current branch 
+
+git checkout <branch_name> // to swich branch 
+git checkout -b <branchname> // to create an new branch and swich 
+git branch -D <branchname> // to delete branch 
