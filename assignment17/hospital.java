@@ -4,11 +4,13 @@ class Patient{
     String disease;
     int id;
     String name;
-    void patient(int id ,String name,int age,String disease){
+    Patient(int id ,String name,int age,String disease){
         this.id=id;
         this.name=name;
         this.age=age;
         this.disease=disease;
+        }
+    void display(){
         System.out.println("----Patient details----");
         System.out.println("Patient name: "+name);
         System.out.println("Patient id: "+id);
@@ -20,10 +22,12 @@ class Doctor{
     int did;
     String dname;
     String sp;
-    void doctor(int did ,String dname,String sp){
+    Doctor(int did ,String dname,String sp){
         this.did=did;
         this.dname=dname;
         this.sp=sp;
+    }
+    void display(){
         System.out.println("----Doctor's details----");
         System.out.println("Name of doctor: "+dname);
         System.out.println("Doctor id: "+did);
@@ -34,10 +38,12 @@ class Medicine{
     int mid;
     String mname;
     int price;
-    void medicine(int mid ,String mname,int price){
+    Medicine(int mid ,String mname,int price){
         this.mid=mid;
         this.mname=mname;
         this.price=price;
+    }
+    void display(){
         System.out.println("----Medicine details----");
         System.out.println("Name of medicine is: "+mname);
         System.out.println("Medicine id: "+mid);
@@ -45,67 +51,105 @@ class Medicine{
     }
 }
 class H{
-    public static void main(String args[]){
-
         Scanner sc=new Scanner(System.in);
-    
+
+        Patient[] arrP= new Patient[3];
+        Doctor[] arrD = new Doctor[3];
+        Medicine[] arrM = new Medicine[3];
+
+        int a=0,b=0,c=0;
+        void patient(){
         System.out.println("---Patient Details---: ");
         System.out.print("Patient ID: ");
         int id=sc.nextInt();
-        System.out.print("Patient name: ");
         sc.nextLine();
+        System.out.print("Patient name: ");
         String name=sc.nextLine();
         System.out.print("Patient age: ");
         int age=sc.nextInt();
+        sc.nextLine();
         System.out.print("Enter disease name: ");
         sc.nextLine();
         String disease=sc.nextLine();
-        Patient pobj=new Patient();
+        arrP[a++]=new Patient(id,name,age,disease);
+        }
 
+        void doctor(){
         System.out.println("---Doctors details---: ");
         System.out.print("Doctor's ID: ");
         int did=sc.nextInt();
-        System.out.print("Enter doctor's name: ");
         sc.nextLine();
+        System.out.print("Enter doctor's name: ");
         String dname=sc.nextLine();
         System.out.print("Doctors Specialization: ");
         String sp=sc.nextLine();
-        sc.nextLine();
-        Doctor dobj=new Doctor();
+        arrD[b++]=new Doctor(did,dname,sp);
+        }
 
+        void medicine(){
         System.out.println("---Medicine details---");
         System.out.print("Enter medicine ID: ");
         int mid=sc.nextInt();
-        System.out.print("Enter medicine name: ");
         sc.nextLine();
+        System.out.print("Enter medicine name: ");
         String mname=sc.nextLine();
         System.out.print("Enter price of medicine: ");
         int price=sc.nextInt();
-        Medicine mobj=new Medicine();
-
-        System.out.print("How many patient: ");
-        int psize=sc.nextInt();
-        Patient arrP[]=new Patient[psize];
-
-        System.out.print("How many doctor: ");
-        int dsize=sc.nextInt();
-        Doctor arrD[]=new Doctor[dsize];
-
-        System.out.print("Quantity of medicine: ");
-        int msize=sc.nextInt();
-        Medicine arrM[]=new Medicine[msize];
-
-        // pobj.patient(id,name,age,disease);
-        // dobj.doctor(did,dname,sp);
-        // mobj.medicine(mid,mname,price);
-
-        for(int i=0;i<=arrM.length;i++){
-            arrM[i]=new Medicine();
-            arrM[i]medicine(mid,mname,price);
+        arrM[c++]=new Medicine(mid,mname,price);
         }
 
-        // for(int i=0;i<=arrM.length;i++){
-        //     arrM[i].showMethod();
-        // }
+        void displayMedicine(){
+            medicine();
+        for(int i=0;i<c;i++){
+            arrM[i].display();
+        }
+        }
+
+        void displayDoctor(){
+            doctor();
+        for(int i=0;i<b;i++){
+            arrD[i].display();
+        }
+        }
+
+        void displayPatient(){
+            patient();
+        for(int i=0;i<a;i++){
+            arrP[i].display();
+        }
+        }
+        void menu(){
+            while(true){
+            System.out.println("\n==== Hospital Management System ====");
+            System.out.println("1. Add Patient");
+            System.out.println("2. Add Doctor");
+            System.out.println("3. Add Medicine");
+            System.out.println("4. Display Patients");
+            System.out.println("5. Display Doctors");
+            System.out.println("6. Display Medicines");
+            System.out.println("7. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = sc.nextInt();
+            sc.nextLine();
+       
+            switch (choice) {
+                case 1:patient();
+                case 2:doctor();
+                case 3:medicine();
+                case 4:displayPatient();
+                case 5:displayDoctor();
+                case 6:displayMedicine();
+                case 7:{
+                    System.out.println("Exiting... Thank you!");
+                    return;
+                }
+            }
+        }
+        } 
+}
+class Main{
+    public static void main(String args[]){
+        H Hobj=new H();
+        Hobj.menu();
     }
 }

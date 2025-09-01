@@ -2,7 +2,7 @@ git checkout -b <branchname> // to create an new branch and swich
 git checkout <branch_name> // to swich branch 
 git branch // to check current branch 
 git status 
-git add .
+git add ..
 git add <finename> // for specific files 
 git commit -m "commit message here "
 git push  
