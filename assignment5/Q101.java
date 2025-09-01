@@ -7,7 +7,7 @@ class Main{
                 System.out.print(k);
             }
             x=x+2;
-            System.out.println();
+            System.out.println(); 
         }
     }
 }
