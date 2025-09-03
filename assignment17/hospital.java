@@ -10,12 +10,10 @@ class Patient{
         this.age=age;
         this.disease=disease;
         }
-    void display(){
-        System.out.println("----Patient details----");
-        System.out.println("Patient name: "+name);
-        System.out.println("Patient id: "+id);
-        System.out.println("Patient age: "+age);
-        System.out.println("Patient disease: "+disease);
+    void patientDetails(){
+        System.out.println("-------------Patient Details---------------");
+        System.out.println("Id\t\tName\t\tAge\t\tDisease");
+        System.out.println(id+"\t\t"+name+"\t\t"+age+"\t\t"+disease);
         }
 }
 class Doctor{
@@ -27,11 +25,10 @@ class Doctor{
         this.dname=dname;
         this.sp=sp;
     }
-    void display(){
-        System.out.println("----Doctor's details----");
-        System.out.println("Name of doctor: "+dname);
-        System.out.println("Doctor id: "+did);
-        System.out.println("Doctor's specialization: "+sp);
+    void doctorDetails(){
+        System.out.println("-------------Doctor Details---------------");
+        System.out.println("Id\t\tName\t\tSpecialization");
+        System.out.println(did+"\t\t"+dname+"\t\t"+sp);
     }
 }
 class Medicine{
@@ -43,82 +40,95 @@ class Medicine{
         this.mname=mname;
         this.price=price;
     }
-    void display(){
-        System.out.println("----Medicine details----");
-        System.out.println("Name of medicine is: "+mname);
-        System.out.println("Medicine id: "+mid);
-        System.out.println("Medicine price: "+price);
-    }
+    void medicineDetails(){
+        System.out.println("-------------Medicine Details---------------");
+        System.out.println("Id\t\tName\t\tPrice");
+        System.out.println(mid+"\t\t"+mname+"\t\t"+price);
+        }
 }
-class H{
+class Test{
         Scanner sc=new Scanner(System.in);
 
-        Patient[] arrP= new Patient[3];
-        Doctor[] arrD = new Doctor[3];
-        Medicine[] arrM = new Medicine[3];
+        Patient arrP[]= new Patient[50];
+        Doctor arrD[] = new Doctor[50];
+        Medicine arrM[] = new Medicine[50];
 
         int a=0,b=0,c=0;
+
         void patient(){
-        System.out.println("---Patient Details---: ");
-        System.out.print("Patient ID: ");
-        int id=sc.nextInt();
-        sc.nextLine();
-        System.out.print("Patient name: ");
-        String name=sc.nextLine();
-        System.out.print("Patient age: ");
-        int age=sc.nextInt();
-        sc.nextLine();
-        System.out.print("Enter disease name: ");
-        sc.nextLine();
-        String disease=sc.nextLine();
-        arrP[a++]=new Patient(id,name,age,disease);
+    
+            System.out.println("Enter Patient Details");
+            System.out.print("Patient ID: ");
+            int id=sc.nextInt();
+            sc.nextLine();
+            System.out.print("Patient name: ");
+            String name=sc.nextLine();
+            System.out.print("Patient age: ");
+            int age=sc.nextInt();
+            sc.nextLine();
+            System.out.print("Enter disease name: ");
+            String disease=sc.nextLine();
+
+            arrP[a++]=new Patient(id,name,age,disease);
         }
 
         void doctor(){
-        System.out.println("---Doctors details---: ");
-        System.out.print("Doctor's ID: ");
-        int did=sc.nextInt();
-        sc.nextLine();
-        System.out.print("Enter doctor's name: ");
-        String dname=sc.nextLine();
-        System.out.print("Doctors Specialization: ");
-        String sp=sc.nextLine();
-        arrD[b++]=new Doctor(did,dname,sp);
+            System.out.println("Enter Doctors details");
+            System.out.print("Doctor's ID: ");
+            int did=sc.nextInt();
+            sc.nextLine();
+            System.out.print("Enter doctor's name: ");
+            String dname=sc.nextLine();
+            System.out.print("Doctors Specialization: ");
+            String sp=sc.nextLine();
+
+            arrD[b++]=new Doctor(did,dname,sp);
         }
 
         void medicine(){
-        System.out.println("---Medicine details---");
-        System.out.print("Enter medicine ID: ");
-        int mid=sc.nextInt();
-        sc.nextLine();
-        System.out.print("Enter medicine name: ");
-        String mname=sc.nextLine();
-        System.out.print("Enter price of medicine: ");
-        int price=sc.nextInt();
-        arrM[c++]=new Medicine(mid,mname,price);
+            System.out.println("Enter Medicine details");
+            System.out.print("Enter medicine ID: ");
+            int mid=sc.nextInt();
+            sc.nextLine();
+            System.out.print("Enter medicine name: ");
+            String mname=sc.nextLine();
+            System.out.print("Enter price of medicine: ");
+            int price=sc.nextInt();
+
+            arrM[c++]=new Medicine(mid,mname,price);
         }
 
         void displayMedicine(){
-            medicine();
         for(int i=0;i<c;i++){
-            arrM[i].display();
+            if(arrM.length==0){
+                System.out.println("No medicine available");
+            }else{
+                arrM[i].medicineDetails();
+            }
         }
         }
 
         void displayDoctor(){
-            doctor();
         for(int i=0;i<b;i++){
-            arrD[i].display();
+            if(arrD.length<1){
+                System.out.println("No doctor available");
+            }else{
+                arrD[i].doctorDetails();
+            }
         }
         }
 
         void displayPatient(){
-            patient();
-        for(int i=0;i<a;i++){
-            arrP[i].display();
-        }
+            for(int i=0;i<a;i++){
+                if(arrP.length<1){
+                System.out.println("No patients available");
+            }else{
+                arrP[i].patientDetails();
+            }
+            }
         }
         void menu(){
+     
             while(true){
             System.out.println("\n==== Hospital Management System ====");
             System.out.println("1. Add Patient");
@@ -131,25 +141,26 @@ class H{
             System.out.print("Enter your choice: ");
             int choice = sc.nextInt();
             sc.nextLine();
-       
-            switch (choice) {
-                case 1:patient();
-                case 2:doctor();
-                case 3:medicine();
-                case 4:displayPatient();
-                case 5:displayDoctor();
-                case 6:displayMedicine();
+            switch (choice){
+                case 1:patient();break;
+                case 2:doctor();break;
+                case 3:medicine();break;
+                case 4:displayPatient();break;
+                case 5:displayDoctor();break;
+                case 6:displayMedicine();break;
                 case 7:{
                     System.out.println("Exiting... Thank you!");
                     return;
                 }
+                default:System.out.println("Invalid Input");
+                break;
             }
         }
-        } 
+    }
 }
 class Main{
     public static void main(String args[]){
-        H Hobj=new H();
-        Hobj.menu();
+        Test obj=new Test();
+        obj.menu();
     }
 }
