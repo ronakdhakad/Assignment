@@ -11,7 +11,7 @@ class Main{
                     System.out.print("_");
                 }
             }
-            System.out.println();
+            System.out.println("");
         }
     }
 }
