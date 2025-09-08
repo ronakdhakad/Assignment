@@ -12,17 +12,19 @@ class AccountHolder{
         this.age=age;
         this.pass=pass;
     }
-    void accountHolderDetails(){
-        System.out.println("~~~~~~~~~~~~ Account Holder Details ~~~~~~~~~~~");
-        System.out.println("Name: "+name+" Email "+mail+" age "+age+" pass "+pass);
-    }
+    // void accountHolderDetails(){
+    //     System.out.println("~~~~~~~~~~~~ Account Holder Details ~~~~~~~~~~~");
+    //     System.out.println("Name: "+name+" Email "+mail+" age "+age+" pass "+pass);
+    // }
 }
-class Joint extends AccountHolder{
+class Joint{
+    AccountHolder accountHolder;
     String jname;
     int jage;
     int jAmt;
-    Joint(String name,String mail,int age,String pass,String jname,int jage,int jAmt){
-        super(name,mail,age,pass);
+    Joint(AccountHolder accountHolder,String jname,int jage,int jAmt){
+        // super(name,mail,age,pass);
+        this.accountHolder=accountHolder;
         this.jname=jname;
         this.jage=jage;
         this.jAmt=jAmt;
@@ -34,23 +36,27 @@ class Joint extends AccountHolder{
         System.out.println("Spouse Name: "+name+" Spouse Age: "+age);
     }
 }
-class Saving extends AccountHolder{
+class Saving{
+    AccountHolder accountHolder;
     String sname;
     int sage;
     int sAmt;
-    Saving(String name,String mail,int age,String pass,String jname,int jage,int sAmt){
-        super(name,mail,age,pass);
+    Saving(AccountHolder accountHolder,String jname,int jage,int sAmt){
+        // super(name,mail,age,pass);
+        this.accountHolder=accountHolder;
         this.sname=sname;
         this.sage=sage;
         this.sAmt=sAmt;
     }
 }
-class Child extends AccountHolder{
+class Child{
+    AccountHolder accountHolder;
     String fname;
     int fage;
     int cAmt;
-    Child(String name,String mail,int age,String pass,String fname,int fage,int cAmt){
-        super(name,mail,age,pass);
+    Child(AccountHolder accountHolder,String fname,int fage,int cAmt){
+        // super(name,mail,age,pass);
+        this.accountHolder=accountHolder;
         this.fname=fname;
         this.fage=fage;
         this.cAmt=cAmt;
@@ -71,7 +77,7 @@ class Display{
         System.out.println("Enter password");
         String pass= sc.nextLine();
 
-        AccountHolder aobj=new AccountHolder(name,mail,age,pass);
+        AccountHolder accountHolder=new AccountHolder(name,mail,age,pass);
         }
         void getSpouse(){
             System.out.println("Enter Spouse Name");
@@ -86,7 +92,7 @@ class Display{
                 System.out.println("# Please re-deposite security Amount ");
                 jAmt=sc.nextInt();
             }
-            Joint jobj=new Joint(jname,jage,jAmt);
+            Joint jobj=new Joint(AccountHolder accountholder,name,mail,age,pass);
         }
         void getNominee(){
             System.out.println("Enter Nominee name");
@@ -101,7 +107,7 @@ class Display{
                 System.out.println("# Please re-deposite security Amount ");
                 sAmt=sc.nextInt();
             }
-            Saving sobj=new Saving(name,mail,age,pass,sname,sage,sAmt);
+            Saving sobj=new Saving(AccountHolder accountholder,sname,sage,sAmt);
         }
         void getChild(){
             System.out.println("Enter father's name");
@@ -116,7 +122,7 @@ class Display{
                 System.out.println("# Please re-deposite security Amount ");
                 cAmt=sc.nextInt();
             }
-            Child cobj=new Child(name,mail,age,pass,cname,cage,cAmt);
+            Child cobj=new Child(AccountHolder accountholder,cname,cage,cAmt);
         }
         void MenuA(){
             System.out.println("");
