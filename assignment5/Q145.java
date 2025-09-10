@@ -10,14 +10,13 @@ class Main{
             for(int j=1;j<=5-i;j++){
                 System.out.print(" ");
             }
-            for(int k=1;k<=i*2;k++){
-                if(k==1){
-                    System.out.print(k);
-                }else{
-                    System.out.print(k);
-                    System.out.print();
-                }
+            for(int k=i;k!=0;k--){
+                System.out.print(k);    
             }
+            for(int l=2;l<=i;l++){
+                System.out.print(l);
+            }
+            System.out.println();
         }
     }
 }
