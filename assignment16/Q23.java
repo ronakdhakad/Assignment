@@ -33,7 +33,6 @@ class Saving{
     String sname;
     int sage;
     int sAmt;
-    Saving(){}
     Saving(String sname,int sage,int sAmt){
         this.sname=sname;
         this.sage=sage;
@@ -47,7 +46,6 @@ class Child{
     String cname;
     int cage;
     int cAmt;
-    Child(){}
     Child(String cname,int cage,int cAmt){
         this.cname=cname;
         this.cage=cage;
@@ -58,6 +56,9 @@ class Child{
     }
 }
 class Display{
+            Joint jointAcc;  
+            Saving savingAcc; 
+            Child childAcc; 
                 //for color
             public static final String BLACK = "\u001B[90m";
             public static final String RED = "\u001B[91m";
@@ -92,8 +93,9 @@ class Display{
                 System.out.println("# Please re-deposite security Amount ");
                 jAmt=sc.nextInt();
             }
-            new Joint(jname,jage,jAmt);
+            jointAcc=new Joint(jname,jage,jAmt);
         }
+
         void getNominee(){
             System.out.println("Enter Nominee name");
             String sname= sc.nextLine();
@@ -107,9 +109,9 @@ class Display{
                 System.out.println("# Please re-deposite security Amount ");
                 sAmt=sc.nextInt();
             }
-            new Saving(sname,sage,sAmt);
-            
+            savingAcc=new Saving(sname,sage,sAmt);
         }
+
         void getChild(){
             System.out.println("Enter father's name");
             String cname= sc.nextLine();
@@ -123,10 +125,11 @@ class Display{
                 System.out.println("# Please re-deposite security Amount ");
                 cAmt=sc.nextInt();
             }
-            new Child(cname,cage,cAmt);
+            childAcc=new Child(cname,cage,cAmt);
         }
+
         void MenuA(){
-            System.out.println("<<<<<<< Welcome To ApnaBank >>>>>>>");
+            System.out.println(".............Choose Account Type.............");
             System.out.println("");
             System.out.println("A.Joint Account");
         
@@ -138,7 +141,6 @@ class Display{
         }
         public static void main(String args[]){
             Scanner sc=new Scanner (System.in);
-
             
             System.out.println("<<<<<<< Welcome To ApnaBank >>>>>>>");
             System.out.println("Enter Account Holder Name");
@@ -158,7 +160,7 @@ class Display{
             obj.MenuA();
             System.out.println("Enter Account Type");
             char ch=sc.next().toLowerCase().charAt(0);
-            
+            System.out.println("");
             switch(ch){
                 case 'a':obj.getSpouse();break;
                 case 'b':obj.getNominee();break;
@@ -172,53 +174,62 @@ class Display{
             System.out.println("Choose account to deposit the amount");
             char check= sc.next().toLowerCase().charAt(0);
             
+            int Amt=0;
             if(check=='a'){
-                System.out.println("Enter amount:");
-                int dAmt=sc.nextInt();
+                System.out.println("Enter Deposite amount:");
+                Amt=sc.nextInt();
             }else if(check =='b'){
-                System.out.println("Enter amount:");
-                int wAmt=sc.nextInt();
+                System.out.println("Enter Withdraw amount:");
+                Amt=sc.nextInt();
             }else{
                 System.out.println("Invalid Input Please re-enter Transaction");
                 char checks= sc.next().toLowerCase().charAt(0);
 
                 if(checks=='a'){
                     System.out.println("Enter amount:");
-                    int dAmt=sc.nextInt();
+                    Amt=sc.nextInt();
                 }else if(checks =='b'){
                     System.out.println("Enter amount:");
-                    int wAmt=sc.nextInt();
+                    Amt=sc.nextInt();
                 }else{
                     System.out.println("Warning: you entered wrong input many times \n Your Don't do transactions.");
                 }
             }
             accountHolder.accountHolderDetails();
-            
-            if(ch=='a'){
-                Joint j=new Joint();
-                j.jointDetails();
-            }else if(ch=='b'){
-                Saving s=new Saving();
-                s.savingDetails();
-            }else{
-                Child c=new Child();
-                c.childDetails();
+
+            if(ch=='a'&& obj.jointAcc != null){
+                obj.jointAcc.jointDetails();
+            }else if(ch=='b'&& obj.savingAcc != null){
+                obj.savingAcc.savingDetails();
+            }else if(ch=='c'&& obj.childAcc != null){
+                obj.childAcc.childDetails();
             }
 
-            // System.out.println("Transactions");
-            // if(ch=='a'){
-            //     Joint j=new Joint();
-            //     j.jAmt;
-            // }else if(ch=='b'){
-            //     Saving s=new Saving();
-            //     s.savingDetails();
-            // }else{
-            //     Child c=new Child();
-            //     c.childDetails();
-            // }
-
-
-
-    
+            System.out.println("Transactions");
+            if(ch=='a'){
+                if(check=='a'){
+                    obj.jointAcc.jAmt +=Amt;
+                    System.out.println("+++++ After Deposite +++++\n Balance: "+obj.jointAcc.jAmt);
+                }else{
+                    obj.jointAcc.jAmt -=Amt;
+                    System.out.println("----- After Withdraw -----\n Balanace: "+obj.jointAcc.jAmt);
+                }
+            }else if(ch=='b'){
+                if(check=='a'){
+                    obj.savingAcc.sAmt +=Amt;
+                    System.out.println("+++++ After Deposite +++++\n Balance: "+obj.savingAcc.sAmt );
+                }else{
+                    obj.savingAcc.sAmt -=Amt;
+                    System.out.println("----- After Withdraw -----\n Balanace: "+obj.savingAcc.sAmt );
+                }
+            }else{
+                if(check=='a'){
+                    obj.childAcc.cAmt +=Amt;
+                    System.out.println("+++++ After Deposite +++++\n Balance: "+obj.childAcc.cAmt);
+                }else{
+                    obj.childAcc.cAmt-=Amt;
+                    System.out.println("----- After Withdraw -----\n Balanace: "+obj.childAcc.cAmt);
+                }
+            }
         }
     }
