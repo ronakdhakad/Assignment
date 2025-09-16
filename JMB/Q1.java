@@ -1,3 +1,4 @@
+import java.util.Scanner;
 class Details{
     String name;
     int mob;
@@ -8,7 +9,7 @@ class Details{
 }
 class breakfast{
     void platePrice(){
-        System.out.printf("%20s%-20s%n","" ,"`BREAKFAST MENU`", " ")
+        System.out.printf("%20s%-20s%n","" ,"`BREAKFAST MENU`", " ");
         System.out.printf("%-15s%-15s%-10s%n","A Rs 200/-" ,"B Rs 230/-", "C Rs 250/-");
         System.out.printf("%-15s%-15s%-10s%n","1 Poha" ,"1 Poha", "1 Poha");
         System.out.printf("%-15s%-15s%-10s%n","1 Jalebi","1 Jalebi","1 Jalebi");
@@ -16,15 +17,51 @@ class breakfast{
         System.out.printf("%-15s%-15s%-10s%n","1 Tea or","1 Heavy Snacks","2 Heavy Snacks\n");
         System.out.printf("%-15s%-15s%-10s%n","  coffee","1 Tea or coffee","1 Tea or coffee\n");
     }
+
 }
 class Veg{
+
+    public static final String RESET = "\u001B[0m";
+
+    // Regular Colors
+    public static final String BLACK = "\u001B[30m";
+    public static final String RED = "\u001B[31m";
+    public static final String GREEN = "\u001B[32m";
+    public static final String YELLOW = "\u001B[33m";
+    public static final String BLUE = "\u001B[34m";
+    public static final String PURPLE = "\u001B[35m";
+    public static final String CYAN = "\u001B[36m";
+    public static final String WHITE = "\u001B[37m";
+
+    // Bold Colors
+    public static final String BLACK_BOLD = "\u001B[1;30m";
+    public static final String RED_BOLD = "\u001B[1;31m";
+    public static final String GREEN_BOLD = "\u001B[1;32m";
+    public static final String YELLOW_BOLD = "\u001B[1;33m";
+    public static final String BLUE_BOLD = "\u001B[1;34m";
+    public static final String PURPLE_BOLD = "\u001B[1;35m";
+    public static final String CYAN_BOLD = "\u001B[1;36m";
+    public static final String WHITE_BOLD = "\u001B[1;37m";
+
+    // Background Colors
+    public static final String BLACK_BG = "\u001B[40m";
+    public static final String RED_BG = "\u001B[41m";
+    public static final String GREEN_BG = "\u001B[42m";
+    public static final String YELLOW_BG = "\u001B[43m";
+    public static final String BLUE_BG = "\u001B[44m";
+    public static final String PURPLE_BG = "\u001B[45m";
+    public static final String CYAN_BG = "\u001B[46m";
+    public static final String WHITE_BG = "\u001B[47m";
+
+
+    Scanner sc =new Scanner(System.in);
     void thaliPrice(){
-        System.out.print("A\t\t\t\t\t\t Rs. 310/-\n");
-        System.out.print("B\t\t\t\t\t\t Rs. 360/-\n");
-        System.out.print("C\t\t\t\t\t\t Rs. 410/-\n");
-        System.out.print("D\t\t\t\t\t\t Rs. 470/-\n");
-        System.out.print("E\t\t\t\t\t\t Rs. 600/-\n");
-        System.out.print("F\t\t\t\t\t\t Rs. 700/-\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"A                     Rs. 310/-\n"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"B                     Rs. 360/-\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"C                     Rs. 410/-\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"D                     Rs. 470/-\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"E                     Rs. 600/-\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"F                     Rs. 700/-\n");
 
         System.out.print("~~~~~~~~~~~~~~~~~~~ Select Thali ~~~~~~~~~~~~~~~~~~~\n");
         System.out.print("\n");
@@ -32,18 +69,19 @@ class Veg{
         if((ch>=65)&&(ch<=70)){
             for(char c=1;c<=122;ch++){
                 System.out.print("* Invalide input Please enter valide data\n");
-                char ch=sc.next().toLowerCase().charAt(0);
+                ch=sc.next().toLowerCase().charAt(0);
             }
         }
-        switch(ch){
-            case 'a':aShow();break;
-            case 'a':aShow();break;
-            case 'a':aShow();break;
-            case 'a':aShow();break;
-            case 'a':aShow();break;
-            case 'a':aShow();break;
-         
-        }
+        // System.out.print("\n");
+            switch(ch){
+                case 'a':aShow();break;
+                case 'b':bShow();break;
+                case 'c':cShow();break;
+                case 'd':dShow();break;
+                case 'e':eShow();break;
+                case 'f':fShow();break;
+            }
+        
 
     }
     void aShow(){
@@ -51,6 +89,7 @@ class Veg{
         System.out.printf("%-40s%s%n","2 Vegetable Dish","Butter Paratha");
         System.out.printf("%-40s%s%n","1 Dal","Pickle, Salad, Papad");
         System.out.printf("%-38s%-2s%n","1 Rice","1 Sweet Dish\n");
+
     }
     void bShow(){
         System.out.printf("%-40s%s%n","1 Soup (or) Welcome Drink ","Roti, Butter Naan");
@@ -97,18 +136,19 @@ class Veg{
 class JMB{
     public static void main(String...args){
         Veg obj =new Veg();
-        obj.a();
-        obj.b();
-        obj.c();
-        obj.d();
-        obj.e();
-        obj.f();
-        obj.aShow();
-        obj.bShow();
-        obj.cShow();
-        obj.dShow();
-        obj.eShow();
-        obj.fShow();
+        obj.thaliPrice();
+        // obj.a();
+        // obj.b();
+        // obj.c();
+        // obj.d();
+        // obj.e();
+        // obj.f();
+        // obj.aShow();
+        // obj.bShow();
+        // obj.cShow();
+        // obj.dShow();
+        // obj.eShow();
+        // obj.fShow();
 
 
     }    
