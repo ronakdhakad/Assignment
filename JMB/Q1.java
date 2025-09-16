@@ -56,12 +56,13 @@ class Veg{
 
     Scanner sc =new Scanner(System.in);
     void thaliPrice(){
-        System.out.printf(WHITE_BOLD+RED_BG+"A                     Rs. 310/-\n"+RESET);
-        System.out.printf(WHITE_BOLD+RED_BG+"B                     Rs. 360/-\n");
-        System.out.printf(WHITE_BOLD+RED_BG+"C                     Rs. 410/-\n");
-        System.out.printf(WHITE_BOLD+RED_BG+"D                     Rs. 470/-\n");
-        System.out.printf(WHITE_BOLD+RED_BG+"E                     Rs. 600/-\n");
-        System.out.printf(WHITE_BOLD+RED_BG+"F                     Rs. 700/-\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"ADeepakRs. 310/-\n"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"BDeepakRs. 360/-\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"CDeepakRs. 410/-\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"DDeepakRs. 470/-\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"EDeepakRs. 600/-\n");
+        System.out.printf(BLUE_BOLD+YELLOW_BG+"FDeepakRs. 700/-\n");
+        System.out.printf(WHITE_BOLD+BLACK_BG+"FDeepakRs. 800/-\n");
 
         System.out.print("~~~~~~~~~~~~~~~~~~~ Select Thali ~~~~~~~~~~~~~~~~~~~\n");
         System.out.print("\n");
@@ -72,15 +73,10 @@ class Veg{
                 ch=sc.next().toLowerCase().charAt(0);
             }
         }
-        // System.out.print("\n");
-            switch(ch){
-                case 'a':aShow();break;
-                case 'b':bShow();break;
-                case 'c':cShow();break;
-                case 'd':dShow();break;
-                case 'e':eShow();break;
-                case 'f':fShow();break;
-            }
+        System.out.printf("%-40s%s%n","1 Soup (or) Welcome Drink" ,"Roti, Naan");
+        System.out.printf("%-40s%s%n","2 Vegetable Dish","Butter Paratha");
+        System.out.printf("%-40s%s%n","1 Dal","Pickle, Salad, Papad");
+        System.out.printf("%-38s%-2s%n","1 Rice","1 Sweet Dish\n");
         
 
     }
