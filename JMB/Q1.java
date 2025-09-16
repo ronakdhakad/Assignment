@@ -56,19 +56,19 @@ class Veg{
 
     Scanner sc =new Scanner(System.in);
     void thaliPrice(){
-        System.out.printf(WHITE_BOLD+RED_BG+"A                     Rs. 310/-\n"+RESET);
-        System.out.printf(WHITE_BOLD+RED_BG+"B                     Rs. 360/-\n");
-        System.out.printf(WHITE_BOLD+RED_BG+"C                     Rs. 410/-\n");
-        System.out.printf(WHITE_BOLD+RED_BG+"D                     Rs. 470/-\n");
-        System.out.printf(WHITE_BOLD+RED_BG+"E                     Rs. 600/-\n");
-        System.out.printf(WHITE_BOLD+RED_BG+"F                     Rs. 700/-\n");
+        System.out.printf(WHITE_BOLD+BLUE_BG+"%-30s%s%n","Thali Name","Price    "+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","A","Rs. 310/-"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","B","Rs. 360/-"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","C","Rs. 410/-"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","D","Rs. 470/-"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","E","Rs. 600/-"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","F","Rs. 700/-"+RESET);
 
-        System.out.print("~~~~~~~~~~~~~~~~~~~ Select Thali ~~~~~~~~~~~~~~~~~~~\n");
-        System.out.print("\n");
+        System.out.printf(WHITE_BOLD+BLUE_BG+"%s%n","~~~~~~~~~~~~~~~~~~~~ Select Thali ~~~~~~~~~~~~~~~~~~"+RESET);
         char ch=sc.next().toLowerCase().charAt(0);
         if((ch>=65)&&(ch<=70)){
             for(char c=1;c<=122;ch++){
-                System.out.print("* Invalide input Please enter valide data\n");
+                System.out.printf(WHITE_BOLD+BLUE_BG+"%-30s%s%n","* Invalide input Please enter valide data"+RESET);
                 ch=sc.next().toLowerCase().charAt(0);
             }
         }
@@ -85,51 +85,51 @@ class Veg{
 
     }
     void aShow(){
-        System.out.printf("%-40s%s%n","1 Soup (or) Welcome Drink" ,"Roti, Naan");
-        System.out.printf("%-40s%s%n","2 Vegetable Dish","Butter Paratha");
-        System.out.printf("%-40s%s%n","1 Dal","Pickle, Salad, Papad");
-        System.out.printf("%-38s%-2s%n","1 Rice","1 Sweet Dish\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Soup (or) Welcome Drink" ,"Roti, Naan            "+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","2 Vegetable Dish","Butter Paratha        "+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Dal","Pickle, Salad, Papad  "+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Rice","1 Sweet Dish            "+RESET);
 
     }
     void bShow(){
-        System.out.printf("%-40s%s%n","1 Soup (or) Welcome Drink ","Roti, Butter Naan");
-        System.out.printf("%-40s%s%n","1 Panneer Dish","Butter Paratha");
-        System.out.printf("%-40s%s%n","2 Vegetable Dish","Pickle, Salad, Papad");
-        System.out.printf("%-38s%-2s%n","1 Dal","1 Sweet Dish");
-        System.out.printf("%-40s%s%n","1 Rice","Ice-cream\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Soup (or) Welcome Drink ","Roti, Butter Naan"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Panneer Dish","Butter Paratha"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","2 Vegetable Dish","Pickle, Salad, Papad"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Dal","1 Sweet Dish"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Rice","Ice-cream"+RESET);
     }
     void cShow(){
-        System.out.printf("%-38s%-2s%n","1 Soup (or) Welcome Drink ","1 Rice");
-        System.out.printf("%-40s%s%n","1 Starter ","Roti, Butter Naan");
-        System.out.printf("%-40s%s%n","1 Paneer Dish","Butter Paratha");
-        System.out.printf("%-40s%s%n","2 Vegetable Dish","Pickle, Salad, Papad");
-        System.out.printf("%-38s%-2s%n","1 Curd Dish","1 Sweet Dish");
-        System.out.printf("%-40s%s%n","1 Dal","Ice-cream\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Soup (or) Welcome Drink ","1 Rice"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Starter ","Roti, Butter Naan"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Paneer Dish","Butter Paratha"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","2 Vegetable Dish","Pickle, Salad, Papad"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Curd Dish","1 Sweet Dish"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Dal","Ice-cream"+RESET);
     }
     void dShow(){
-        System.out.printf("%-38s%-2s%n","1 Soup (or) Welcome Drink ","1 Rice");
-        System.out.printf("%-40s%s%n","2 Starter ","Roti, Butter Naan");
-        System.out.printf("%-40s%s%n","1 Paneer Dish","Paratha");
-        System.out.printf("%-40s%s%n","2 Vegetable Dish","Pickle, Salad, Papad");
-        System.out.printf("%-38s%-2s%n","1 Curd Dish","1 Sweet Dish");
-        System.out.printf("%-40s%s%n","1 Dal","Ice-cream or Coffee\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Soup (or) Welcome Drink ","1 Rice"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","2 Starter ","Roti, Butter Naan"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Paneer Dish","Paratha"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","2 Vegetable Dish","Pickle, Salad, Papad"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Curd Dish","1 Sweet Dish"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Dal","Ice-cream or Coffee"+RESET);
     }
     void eShow(){
-        System.out.printf("%-38s%-2s%n","1 Soup (or) Welcome Drink ","1 Curd Dish");
-        System.out.printf("%-38s%-2s%n","2 Starter ","1 Dal");
-        System.out.printf("%-38s%-2s%n","1 Paneer Starter","1 Rice");
-        System.out.printf("%-40s%s%n","1 Pasta(1 Type)","Roti, Naan, Paratha");
-        System.out.printf("%-40s%s%n","1 Paneer Dish","Pickle, Salad, Papad");
-        System.out.printf("%-38s%-2s%n","2 Vegetable Dish","1 Sweet Dish,\n\t\t\t\t\tIce-cream or Coffee\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Soup (or) Welcome Drink ","1 Curd Dish"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","2 Starter ","1 Dal"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Paneer Starter","1 Rice"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Pasta(1 Type)","Roti, Naan, Paratha"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Paneer Dish","Pickle, Salad, Papad"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","2 Vegetable Dish","1 Sweet Dish,                 Ice-cream or Coffee"+RESET);
     }
     void fShow(){
-        System.out.printf("%-38s%-2s%n","2 Soup ","1 Curd Dish");
-        System.out.printf("%-38s%-2s%n","1 Welcome Drink","1 Dal");
-        System.out.printf("%-38s%-2s%n","3 Starter ","1 Rice");
-        System.out.printf("%-40s%s%n","1 Paneer Starter","Roti, Naan, Paratha");
-        System.out.printf("%-40s%s%n","1 Chinese Item","Pickle, Salad, Papad");
-        System.out.printf("%-38s%-2s%n","1 Paneer Dish","2 Sweet Dish");
-        System.out.printf("%-38s%-2s%n","2 Vegetable Dish","1 Ice-cream\n");
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","2 Soup ","1 Curd Dish           "+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Welcome Drink","1 Dal                 "+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","3 Starter ","1 Rice                "+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Paneer Starter","Roti, Naan, Paratha "+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Chinese Item","Pickle, Salad, Papad"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Paneer Dish","2 Sweet Dish          "+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","2 Vegetable Dish","1 Ice-cream           "+RESET);
     }
 }
 
