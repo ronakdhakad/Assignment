@@ -6,24 +6,45 @@ class Details{
         mob=m;
     }
 }
+class breakfast{
+    void platePrice(){
+        System.out.printf("%20s%-20s%n","" ,"`BREAKFAST MENU`", " ")
+        System.out.printf("%-15s%-15s%-10s%n","A Rs 200/-" ,"B Rs 230/-", "C Rs 250/-");
+        System.out.printf("%-15s%-15s%-10s%n","1 Poha" ,"1 Poha", "1 Poha");
+        System.out.printf("%-15s%-15s%-10s%n","1 Jalebi","1 Jalebi","1 Jalebi");
+        System.out.printf("%-15s%-15s%-10s%n","1 Bread Item","1 Bread Item", "1 Bread Item");
+        System.out.printf("%-15s%-15s%-10s%n","1 Tea or","1 Heavy Snacks","2 Heavy Snacks\n");
+        System.out.printf("%-15s%-15s%-10s%n","  coffee","1 Tea or coffee","1 Tea or coffee\n");
+    }
+}
 class Veg{
-    void a(){
+    void thaliPrice(){
         System.out.print("A\t\t\t\t\t\t Rs. 310/-\n");
-    }
-    void b(){
         System.out.print("B\t\t\t\t\t\t Rs. 360/-\n");
-    }
-    void c(){
         System.out.print("C\t\t\t\t\t\t Rs. 410/-\n");
-    }
-    void d(){
         System.out.print("D\t\t\t\t\t\t Rs. 470/-\n");
-    }
-    void e(){
         System.out.print("E\t\t\t\t\t\t Rs. 600/-\n");
-    }
-    void f(){
         System.out.print("F\t\t\t\t\t\t Rs. 700/-\n");
+
+        System.out.print("~~~~~~~~~~~~~~~~~~~ Select Thali ~~~~~~~~~~~~~~~~~~~\n");
+        System.out.print("\n");
+        char ch=sc.next().toLowerCase().charAt(0);
+        if((ch>=65)&&(ch<=70)){
+            for(char c=1;c<=122;ch++){
+                System.out.print("* Invalide input Please enter valide data\n");
+                char ch=sc.next().toLowerCase().charAt(0);
+            }
+        }
+        switch(ch){
+            case 'a':aShow();break;
+            case 'a':aShow();break;
+            case 'a':aShow();break;
+            case 'a':aShow();break;
+            case 'a':aShow();break;
+            case 'a':aShow();break;
+         
+        }
+
     }
     void aShow(){
         System.out.printf("%-40s%s%n","1 Soup (or) Welcome Drink" ,"Roti, Naan");
@@ -71,7 +92,8 @@ class Veg{
         System.out.printf("%-38s%-2s%n","1 Paneer Dish","2 Sweet Dish");
         System.out.printf("%-38s%-2s%n","2 Vegetable Dish","1 Ice-cream\n");
     }
-} 
+}
+
 class JMB{
     public static void main(String...args){
         Veg obj =new Veg();

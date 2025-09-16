@@ -7,7 +7,7 @@ class Main{
     public static void main(String...args){
     // int a=12;
     // String b="mpif";
-    Main obj=new R(){
+    R obj=new R(){
         @Override
         public void m(){
             System.out.println("A: "+a+" B: "+b );
