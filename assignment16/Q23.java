@@ -143,16 +143,16 @@ class Display{
             Scanner sc=new Scanner (System.in);
             
             System.out.println("<<<<<<< Welcome To ApnaBank >>>>>>>");
-            System.out.println("Enter Account Holder Name");
-            String name= sc.nextLine();
-            System.out.println("Enter mail-Id");
-            String mail= sc.nextLine();
-            sc.nextLine();
-            System.out.println("Enter age");
-            int age= sc.nextInt();
-            sc.nextLine();
-            System.out.println("Enter password");
-            String pass= sc.nextLine();
+                System.out.println("Enter Account Holder Name");
+                String name= sc.nextLine();
+                System.out.println("Enter mail-Id");
+                String mail= sc.nextLine();
+                sc.nextLine();
+                System.out.println("Enter age");
+                int age= sc.nextInt();
+                sc.nextLine();
+                System.out.println("Enter password");
+                String pass= sc.nextLine();
             
             AccountHolder accountHolder=new AccountHolder(name,mail,age,pass);
 

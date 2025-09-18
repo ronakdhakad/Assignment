@@ -267,7 +267,18 @@ class Veg{
         }
     }
 }
-
+class Menu{
+      public static final String WHITE_BOLD = "\u001B[1;37m";
+      public static final String RESET = "\u001B[0m";
+      public static final String RED_BG = "\u001B[41m";
+      public static final String CYAN_BG = "\u001B[40m";
+      public static final String BLUE_BOLD = "\u001B[1;34m";
+      
+    void soup(){
+    System.out.printf(WHITE_BOLD+RED_BG+"************* SOUP **************"+RESET);
+    System.out.printf(CYAN_BG+BLUE_BOLD+"#1. Tomato Soup          #2. Veg Mancho"+RESET);
+    System.out.printf(CYAN_BG+BLUE_BOLD+"#3. Hot & Sour Veg       #4. Lemon Coriander"+RESET);
+}
 class JMB{
     public static final String RESET = "\u001B[0m";
 
@@ -330,6 +341,8 @@ class JMB{
             case 'b':lobj.plate();break;
             case 'c':bobj.platePrice();break;
             default:
+        }
+
         }
         
     }    
