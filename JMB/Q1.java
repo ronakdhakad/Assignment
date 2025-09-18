@@ -49,7 +49,8 @@ class Details{
         System.out.printf(WHITE_BOLD+RED_BG+"%-30s%-20s%s%n","No. of Guest :",guest,""+RESET);
     }
 }
-class forLadies{
+class ForLadies{
+    Scanner sc=new Scanner(System.in);
             public static final String RESET = "\u001B[0m";
 
     // Regular Colors
@@ -97,7 +98,9 @@ class forLadies{
         System.out.printf(BLUE_BOLD+WHITE_BG+"%-25s%-15s%n","1 Soup or" ,"1 Paneer Starter"+RESET);
         System.out.printf(BLUE_BOLD+WHITE_BG+"%-25s%-15s%n","  Welcome Drink","1 Sweet Dish     "+RESET);
         System.out.printf(BLUE_BOLD+WHITE_BG+"%-25s%-15s%n","2 Snacks","1 Tea or Ice-Cream"+RESET);
-    
+
+        System.out.printf(WHITE_BOLD+BLUE_BG+"%s%n","~~~~~~~~~~~~~~~~~~~~ Select Thali ~~~~~~~~~~~~~~~~~~"+RESET);
+        char ch=sc.next().toLowerCase().charAt(0);
     }
 }
 class BreakFast{
@@ -107,18 +110,19 @@ class BreakFast{
     public static final String BLUE_BG = "\u001B[44m";
     void platePrice(){
 
-        System.out.printf(BLUE_BG+WHITE+"%20s%-20s%n","" ,"`BREAKFAST MENU`", " "+RESET);
+        System.out.printf(BLUE_BG+WHITE+"%20s%-20s%n","" ,"`BREAKFAST MENU`"+RESET);
         System.out.printf(BLACK_BG+WHITE+"%-15s%-15s%-10s%n","A Rs 200/-" ,"B Rs 230/-", "C Rs 250/-"+RESET);
         System.out.printf(BLACK_BG+WHITE+"%-15s%-15s%-10s%n","1 Poha" ,"1 Poha", "1 Poha"+RESET);
         System.out.printf(BLACK_BG+WHITE+"%-15s%-15s%-10s%n","1 Jalebi","1 Jalebi","1 Jalebi"+RESET);
         System.out.printf(BLACK_BG+WHITE+"%-15s%-15s%-10s%n","1 Bread Item","1 Bread Item", "1 Bread Item"+RESET);
         System.out.printf(BLACK_BG+WHITE+"%-15s%-15s%-10s%n","1 Tea or","1 Heavy Snacks","2 Heavy Snacks\n"+RESET);
-        System.out.printf(BLACK_BG+WHITE+"%-15s%-15s%-10s%n","  coffee","1 Tea or coffee","1 Tea or coffee\n"+RESET);
+        System.out.printf(BLACK_BG+WHITE+"%-15s%-15s%-10s%n","  coffee","1 Tea or coffe","1 Tea or coffee\n"+RESET);
 
         Scanner sc =new Scanner(System.in);
-        System.out.printf(WHITE+BLUE_BG+"%s%n","~~~~~~~~~~~~~~~~~~~~ Select Thali ~~~~~~~~~~~~~~~~~~"+RESET);
+        System.out.printf(WHITE+BLUE_BG+"%s%n","~~~~~~~~~~~~~~~~~~~~ Select Breakfast ~~~~~~~~~~~~~~~~~~"+RESET);
         char ch=sc.next().toLowerCase().charAt(0);
     }
+
 }
 class Veg{
 
@@ -181,7 +185,6 @@ class Veg{
                 case 'e':eShow();break;
                 case 'f':fShow();break;
             }
-
     }
     void aShow(){
         System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Soup (or) Welcome Drink" ,"Roti, Naan            "+RESET);
@@ -235,6 +238,8 @@ class Veg{
         char c=sc.next().toLowerCase().charAt(0);
         if(c=='y'){
             thaliPrice();
+        }else{
+
         }
     }
     void eShow(){
@@ -279,6 +284,7 @@ class Menu{
     System.out.printf(CYAN_BG+BLUE_BOLD+"#1. Tomato Soup          #2. Veg Mancho"+RESET);
     System.out.printf(CYAN_BG+BLUE_BOLD+"#3. Hot & Sour Veg       #4. Lemon Coriander"+RESET);
 }
+}
 class JMB{
     public static final String RESET = "\u001B[0m";
 
@@ -311,10 +317,11 @@ class JMB{
     public static final String PURPLE_BG = "\u001B[45m";
     public static final String CYAN_BG = "\u001B[46m";
     public static final String WHITE_BG = "\u001B[47m";
-    public static void main(String...args){
+
+    public static void main(String args[]){
         
         Scanner sc=new Scanner(System.in);
-        System.out.print(BLACK_BG+WHITE+"Enter Customer Name: "+RESET);
+        System.out.printf(BLACK_BG+WHITE+"Enter Customer Name: "+RESET);
         String n= sc.nextLine();
         System.out.println(BLACK_BG+WHITE+"Enter mobile no."+RESET);
         int m= sc.nextInt();
@@ -333,16 +340,13 @@ class JMB{
         char ch1= sc.next().toLowerCase().charAt(0);
 
         Veg obj =new Veg();
-        forLadies lobj=new forLadies();
+        ForLadies lobj=new ForLadies();
         BreakFast bobj=new BreakFast();
 
         switch(ch1){
             case 'a':obj.thaliPrice();break;
             case 'b':lobj.plate();break;
             case 'c':bobj.platePrice();break;
-            default:
-        }
-
         }
         
     }    
