@@ -201,7 +201,20 @@ class Veg{
         if(c=='y'){
             thaliPrice();
         }else{
+            
+            dal();
+            rice();
+            roti();
+            starter();
+            snacks();
+            chineseContinental();
+            vegetables();
             soup();
+            mocktail();
+            paneer();
+            paneerDish();
+            curdDish();
+            iceCream();
         }
 
     }
@@ -306,15 +319,166 @@ class Veg{
                     // thaliPrice();
                 }
         }
-}
-class Menu{
-    Scanner sc=new Scanner(System.in);
-      public static final String WHITE_BOLD = "\u001B[1;37m";
-      public static final String RESET = "\u001B[0m";
-      public static final String RED_BG = "\u001B[41m";
-      public static final String CYAN_BG = "\u001B[40m";
-      public static final String BLUE_BOLD = "\u001B[1;34m";
-      
+        void paneer(){
+            System.out.printf(BLUE_BOLD+WHITE_BOLD+"%s%n","*************** PANEER STARTERS **************"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#1. Paneer Chilli           #5. Paneer Pudina Tikka"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#2. Paneer Tikka  #6. Paneer Achari Tikka"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#3. Dragon Paneer                            "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#3. Paneer 65                            "+RESET);
+            
+            System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another Starter... (Y or N)      "+RESET);
+                char c=sc.next().toLowerCase().charAt(0);
+                if(c=='y'){
+                    // thaliPrice();
+                }
+        }
+        void paneerDish(){
+            System.out.printf(BLUE_BOLD+WHITE_BOLD+"%s%n","****************** PANEER DISH  *******************"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#1. Paneer Butter Masala        #7. Paneer Kadai     "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#2. Paneer Punjabi              #8. Methi Paneer     "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#3. Paneer Palak                #9. Corn Paneer      "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#4. Paneer Mutter               #10. Paneer Kolhapuri"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#5. PaneerDo Pyaza              #11. Paneer Chatpatta"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#6. Paneer Tikka Masala                              "+RESET);
+            
+            System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another Starter... (Y or N)      "+RESET);
+                char c=sc.next().toLowerCase().charAt(0);
+                if(c=='y'){
+                    // thaliPrice();
+                }
+        }
+        void curdDish(){
+            System.out.printf(BLUE_BOLD+WHITE_BOLD+"%s%n","*************** CURD DISH **************"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#1. Veg Raita             #5. Boondi Raita"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#2. Loki Raita            #6. Fruit Raita "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#3. Aloo Raita            #7. Dahi Vada   "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#4. Dahi Papdi                            "+RESET);
+            
+            System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another Starter... (Y or N)      "+RESET);
+                char c=sc.next().toLowerCase().charAt(0);
+                if(c=='y'){
+                    // thaliPrice();
+                }
+        }
+        void iceCream(){
+            System.out.printf(BLUE_BOLD+WHITE_BOLD+"%s%n","************** SWEETS or ICE-CREAM ************"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#1. Gulab Jamun             #5. Aam Khanda       "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#2. Gajar Ka Halwa          #6. Vanilla          "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#3. Moong Ka Halwa          #7. Butter Scotch    "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#4. Shree Khand             #8. Sitaphal Basundi "+RESET);
+            
+            System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another Starter... (Y or N)        "+RESET);
+                char c=sc.next().toLowerCase().charAt(0);
+                if(c=='y'){
+                    // thaliPrice();
+                }
+        }
+        void vegetables(){
+            System.out.printf(BLUE_BOLD+WHITE_BOLD+"%s%n","**************** VEGETABLES ****************"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#1. Nav Ratan Korma          #13. Jeera Aloo         "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#2. Lahori Aloo Mutter       #14. Dum Aloo           "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#3. Mix Veg                  #15. Gujrati Aloo       "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#4. Green Chana (Seasonal)   #16. Tinda Masala       "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#5. Corn Palak               #17. Aloo Palak         "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#6. Aloo 65                  #18. Seasonal Veg       "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#7. Aloo Mutter              #19. Bhindi Do Pyaza    "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#8. Aloo Capsicum            #20. Veg. Kolhapuri     "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#9. Aloo Do Pyaza            #21. Corn Capsicum      "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#10. Aloo Gobhi              #22. Methi Mutter Malai "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#11. Gobhi Mutter            #23. Haryali Kofta      "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#12. Kadi Punjabi             #24. Chana Masala       "+RESET);
+
+            System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another section... (Y or N)        "+RESET);
+            char c=sc.next().toLowerCase().charAt(0);
+            if(c=='y'){
+                // call next section
+            }
+        }
+
+        void dal(){
+            System.out.printf(BLUE_BOLD+WHITE_BOLD+"%s%n","**************** DAL ****************"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#1. Dal Fry             #3. Dal Makhani     "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#2. Dal Tadka           #4. Dal Panchrangi  "+RESET);
+
+            System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another section... (Y or N)        "+RESET);
+            char c=sc.next().toLowerCase().charAt(0);
+            if(c=='y'){
+                // call next section
+            }
+        }
+
+        void rice(){
+            System.out.printf(BLUE_BOLD+WHITE_BOLD+"%s%n","**************** RICE ****************"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#1. Rice                 #4. Veg Pulao       "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#2. Jeera Rice           #5. Veg Fried Rice  "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#3. Green Peas Pulao     #6. Veg Biryani     "+RESET);
+
+            System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another section... (Y or N)        "+RESET);
+            char c=sc.next().toLowerCase().charAt(0);
+            if(c=='y'){
+                // call next section
+            }
+        }
+
+        void roti(){
+            System.out.printf(BLUE_BOLD+WHITE_BOLD+"%s%n","**************** ROTI ****************"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#1. Roti                 #4. Naan            "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#2. Paratha              #5. Missi Roti      "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#3. Kulcha               #6. Methi Poori     "+RESET);
+
+            System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another section... (Y or N)        "+RESET);
+            char c=sc.next().toLowerCase().charAt(0);
+            if(c=='y'){
+                // call next section
+            }
+        }
+
+        void snacks(){
+            System.out.printf(BLUE_BOLD+WHITE_BOLD+"%s%n","**************** SNACKS ****************"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#1. Idli/Vada Shambhar      #7. Noodles            "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#2. Pav Bhaji               #8. Chhole Bhatura     "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#3. Chhola Kulcha           #9. Chhola Poori       "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#4. Methi Paratha           #10. Paratha w/ Dahi   "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#5. Stuffed Paratha         #11. Aloo Paratha      "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#6. Muli Paratha            #12. Gobhi Paratha     "+RESET);
+
+            System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another section... (Y or N)        "+RESET);
+            char c=sc.next().toLowerCase().charAt(0);
+            if(c=='y'){
+                // call next section
+            }
+        }
+
+        void starter(){
+            System.out.printf(BLUE_BOLD+WHITE_BOLD+"%s%n","**************** STARTER ****************"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#1. Mix Veg Pakoda          #9. Corn Chat           "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#2. Veg Finger              #10. Aloo Chat          "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#3. Bread Pakoda            #11. Saboo Dana Vada    "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#4. Methi Kabab             #12. Veg Manchurian Dry "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#5. Moong Pakoda            #13. Tandoori Manchurian"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#6. Dragon Aloo             #14. Chinese Corn Kebab "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#7. Saboo Dana              #15. Veg Cutlet         "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#8. Finger Chips            #16. Veg Kothey         "+RESET);
+
+            System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another section... (Y or N)        "+RESET);
+            char c=sc.next().toLowerCase().charAt(0);
+            if(c=='y'){
+                // call next section
+            }
+        }
+
+        void chineseContinental(){
+            System.out.printf(BLUE_BOLD+WHITE_BOLD+"%s%n","******** CHINESE & CONTINENTAL ********"+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#1. Baked Veg               #4. Baked Palak           "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#2. Veg Manchurian          #5. Veg Singapore Noodles "+RESET);
+            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#3. Veg Noodles             #6. Veg Fried Rice        "+RESET);
+
+            System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another section... (Y or N)        "+RESET);
+            char c=sc.next().toLowerCase().charAt(0);
+            if(c=='y'){
+                // call next section
+            }
+    }
 
 }
 class JMB{
