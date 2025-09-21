@@ -126,7 +126,8 @@ class BreakFast{
     }
 }
 class Veg{
-
+    int i=0;
+    String veg[]=new String[100];
     
     // Regular Colors
     public static final String RESET = "\u001B[0m";
@@ -201,20 +202,28 @@ class Veg{
         if(c=='y'){
             thaliPrice();
         }else{
+            System.out.printf(WHITE_BOLD+RED_BG+"Select any one #1. shoup or #2. Welcome Drink "+RESET);
+            int n1=sc.nextInt();
             
-            dal();
-            rice();
-            roti();
-            starter();
-            snacks();
-            chineseContinental();
-            vegetables();
-            soup();
-            mocktail();
-            paneer();
-            paneerDish();
-            curdDish();
-            iceCream();
+            switch(n1){
+                case 1:soup();break;
+                case 2:mocktail();break;
+                default:{System.out.println("# Invalide Input.....");
+                }
+            }
+            // soup();
+            // dal();
+            // rice();
+            // roti();
+            // starter();
+            // snacks();
+            // chineseContinental();
+            // vegetables();
+            // mocktail();
+            // paneer();
+            // paneerDish();
+            // curdDish();
+            // iceCream();
         }
 
     }
@@ -298,26 +307,39 @@ class Veg{
             System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#3. Hot & Sour Veg       #4. Lemon Coriander"+RESET);
             
             
-            System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another Starter... (Y or N)      "+RESET);
-                char c=sc.next().toLowerCase().charAt(0);
-                if(c=='y'){
-                    mocktail();
-                    thaliPrice();
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose Any one (1,2,3,4).....  "+RESET);
+                int n2=sc.nextInt();
+                switch(n2){
+                    case 1:veg[i++]= "Tomato soup";break;
+                    case 2:veg[i++]= "Veg Mancho";break;
+                    case 3:veg[i++]= "Hot & Sour Veg";break;
+                    case 4:veg[i++]= "Lemon Coriander";break;
                 }
+
         }
-        void mocktail(){
-            System.out.printf(BLUE_BOLD+WHITE_BOLD+"%s%n","*************** MOCKTAIL **************"+RESET);
-            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#1. Blue Lagoon           #5. Orange Pink City"+RESET);
-            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#2. Blowgun Kesher Pista  #6. Strawberry Delight"+RESET);
-            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#3. Fresh Lime Water      #7. Jal Jeera"+RESET);
-            System.out.printf(WHITE_BG+BLUE_BOLD+"%s%n","#4. Butter Milk           #8. Rasna Water"+RESET);
-            
-            
-            System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another Starter... (Y or N)      "+RESET);
-                char c=sc.next().toLowerCase().charAt(0);
-                if(c=='y'){
-                    // thaliPrice();
-                }
+        void mocktail() {
+            System.out.printf(BLUE_BOLD + WHITE_BOLD + "%s%n", "*************** MOCKTAIL **************" + RESET);
+            System.out.printf(WHITE_BG + BLUE_BOLD + "%s%n", "#1. Blue Lagoon           #5. Orange Pink City" + RESET);
+            System.out.printf(WHITE_BG + BLUE_BOLD + "%s%n", "#2. Blowgun Kesher Pista  #6. Strawberry Delight" + RESET);
+            System.out.printf(WHITE_BG + BLUE_BOLD + "%s%n", "#3. Fresh Lime Water      #7. Jal Jeera" + RESET);
+            System.out.printf(WHITE_BG + BLUE_BOLD + "%s%n", "#4. Butter Milk           #8. Rasna Water" + RESET);
+
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any one (1,2,3,.....n) " + RESET);
+
+            int n2 = sc.nextInt();
+            switch (n2) {
+                case 1: veg[i++] = "Blue Lagoon"; break;
+                case 2: veg[i++] = "Blowgun Kesher Pista"; break;
+                case 3: veg[i++] = "Fresh Lime Water"; break;
+                case 4: veg[i++] = "Butter Milk"; break;
+                case 5: veg[i++] = "Orange Pink City"; break;
+                case 6: veg[i++] = "Strawberry Delight"; break;
+                case 7: veg[i++] = "Jal Jeera"; break;
+                case 8: veg[i++] = "Rasna Water"; break;
+                default: System.out.println("⚠️ Invalid choice, please try again.");
+            }
+}
+
         }
         void paneer(){
             System.out.printf(BLUE_BOLD+WHITE_BOLD+"%s%n","*************** PANEER STARTERS **************"+RESET);
@@ -481,7 +503,7 @@ class Veg{
     }
 
 }
-class JMB{
+class JMB extends Veg{
     
     // Regular Colors
     public static final String RESET = "\u001B[0m";
@@ -534,9 +556,9 @@ class JMB{
             case 'b':lobj.plate();break;
             case 'c':bobj.platePrice();break;
         }
-    }  
+        }
 }
-class Main{
+class Main extends Veg{
     public static final String RESET = "\u001B[0m";
     public static final String BLACK_BG = "\u001B[40m";
     public static final String WHITE = "\u001B[37m";
@@ -553,7 +575,6 @@ class Main{
     
     JMB jobj=new JMB();
     jobj.menu();
-        
         
     }
 }
