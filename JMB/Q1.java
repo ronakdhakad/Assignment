@@ -251,7 +251,30 @@ class Veg{
 
         if(c=='y'){
             thaliPrice();
+        }else{
+            System.out.printf(WHITE_BOLD+RED_BG+"Choose your Thali's Items..."+RESET);
         }
+        System.out.printf(WHITE_BOLD+RED_BG+"Select any one #1. shoup or #2. Welcome Drink "+RESET);
+            int n1=sc.nextInt();
+            
+            switch(n1){
+                case 1:soup();break;
+                case 2:mocktail();break;
+                default:{System.out.println("# Invalide Input.....");
+                }
+            }
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose Any One Dish "+RESET);
+            paneerDish();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any Two Dish (1-24) " + RESET);
+            vegetables();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose One More Dish " + RESET);
+            vegetables();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any One Dal " + RESET);
+            dal();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any One Rice " + RESET);
+            rice();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any One Sweet Dish  " + RESET);
+            iceCream();
     }
     void cShow(){
         System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Soup (or) Welcome Drink ","1 Rice"+RESET);
@@ -263,9 +286,37 @@ class Veg{
 
         System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another thali... (Y or N)      "+RESET);
         char c=sc.next().toLowerCase().charAt(0);
+
         if(c=='y'){
             thaliPrice();
+        }else{
+            System.out.printf(WHITE_BOLD+RED_BG+"Choose your Thali's Items..."+RESET);
         }
+        System.out.printf(WHITE_BOLD+RED_BG+"Select any one #1. shoup or #2. Welcome Drink "+RESET);
+            int n1=sc.nextInt();
+            
+            switch(n1){
+                case 1:soup();break;
+                case 2:mocktail();break;
+                default:{System.out.println("# Invalide Input.....");
+                }
+            }
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose Starter "+RESET);
+            starter();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any Two Dish (1-24) " + RESET);
+            vegetables();
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose one more "+RESET);
+            vegetables();
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose Any One Dish "+RESET);
+            paneerDish();
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose Any one curdDish  "+RESET);
+            curdDish();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any One Dal " + RESET);
+            dal();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any One Rice " + RESET);
+            rice();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any One Sweet Dish  " + RESET);
+            iceCream();
     }
     void dShow(){
         System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Soup (or) Welcome Drink ","1 Rice"+RESET);
@@ -280,9 +331,33 @@ class Veg{
         if(c=='y'){
             thaliPrice();
         }else{
-
+            System.out.printf(WHITE_BOLD+RED_BG+"Choose your Thali's Items..."+RESET);
         }
-
+        System.out.printf(WHITE_BOLD+RED_BG+"Select any one #1. shoup or #2. Welcome Drink "+RESET);
+            int n1=sc.nextInt();
+            
+            switch(n1){
+                case 1:soup();break;
+                case 2:mocktail();break;
+                default:{System.out.println("# Invalide Input.....");
+                }
+            }
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose  Any Two Starter "+RESET);
+            starter();
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose  One More  "+RESET);
+            starter();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any Two Dish (1-24) " + RESET);
+            vegetables();
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose one more "+RESET);
+            vegetables();
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose Any One Dish "+RESET);
+            paneerDish();
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose Any one curdDish  "+RESET);
+            curdDish();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any One Dal " + RESET);
+            dal();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any One Sweet Dish  " + RESET);
+            iceCream();
     }
     void eShow(){
         System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Soup (or) Welcome Drink ","1 Curd Dish"+RESET);
@@ -290,13 +365,42 @@ class Veg{
         System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","1 Paneer Starter","1 Rice"+RESET);
         System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Pasta(1 Type)","Roti, Naan, Paratha"+RESET);
         System.out.printf(WHITE_BOLD+RED_BG+"%-30s%s%n","1 Paneer Dish","Pickle, Salad, Papad"+RESET);
-        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","2 Vegetable Dish","1 Sweet Dish,                 Ice-cream or Coffee"+RESET);
+        System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","2 Vegetable Dish","1 Sweet Dish,Ice-cream or Coffee"+RESET);
 
         System.out.printf(WHITE_BOLD+RED_BG+"Do you want to choose another thali... (Y or N)      "+RESET);
         char c=sc.next().toLowerCase().charAt(0);
         if(c=='y'){
             thaliPrice();
+        }else{
+            System.out.printf(WHITE_BOLD+RED_BG+"Choose your Thali's Items..."+RESET);
         }
+        System.out.printf(WHITE_BOLD+RED_BG+"Select any one #1. shoup or #2. Welcome Drink "+RESET);
+            int n1=sc.nextInt();
+            
+            switch(n1){
+                case 1:soup();break;
+                case 2:mocktail();break;
+                default:{System.out.println("# Invalide Input.....");
+                }
+            }
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose  Any Two Starter "+RESET);
+            starter();
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose  One More  "+RESET);
+            starter();
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose  One More  "+RESET);
+            snacks();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any Two Dish (1-24) " + RESET);
+            vegetables();
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose one more "+RESET);
+            vegetables();
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose Any One Dish "+RESET);
+            paneerDish();
+            System.out.printf(WHITE_BOLD+RED_BG+" Choose Any one curdDish  "+RESET);
+            curdDish();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any One Dal " + RESET);
+            dal();
+            System.out.printf(WHITE_BOLD + RED_BG + " Choose Any One Sweet Dish  " + RESET);
+            iceCream();
     }
     void fShow(){
         System.out.printf(WHITE_BOLD+RED_BG+"%-28s%-2s%n","2 Soup ","1 Curd Dish           "+RESET);
