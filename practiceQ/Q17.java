@@ -18,12 +18,11 @@ class Main{
         int a=sc.nextInt();
         System.out.println("Enter Value of 'B'");
         int b=sc.nextInt();
-
+        
         Runtimeerror o=new Runtimeerror(a,b);
         try{
-            throw new ArithmeticException("Exception created...");
             o.error();
-        }catch(ArithmeticException r|Exception e){
+        }catch(Exception e){
             System.out.println(e);
             e.getMessage();
         }
