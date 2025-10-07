@@ -1,0 +1,9 @@
+Customer Name : hgf
+Account Number : 76543
+Initial Balance : 2344.0
+Transactions:
+Debit: 35.0 | Balance: 2309.0
+
+Final Balance : 2309.0
+Total Credit Transactions : 0
+Total Debit Transactions : 1
