@@ -20,7 +20,7 @@ class Test{
                     if(x==-1){
                         break;
                     }
-                    if(x=='t' || x=='T'){
+                    if(x=='t'||x=='T'){
                         count++;
                     }
                     System.out.print((char)x);
