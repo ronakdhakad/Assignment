@@ -6,14 +6,13 @@
 import java.util.Scanner;
 import java.io.*;
 
-class Test {
-    public static void main(String args[]) {
+class Test{
+    public static void main(String args[]){
         Scanner sc = new Scanner(System.in);
         File file = new File("deepak@deepaks-MacBook-Air Assignment% MyFolder1.txt");
 
-        try (FileWriter fw = new FileWriter(file)) {
+        try(FileWriter fw = new FileWriter(file)){
 
-            // User Details
             System.out.print("Enter Customer Name: ");
             String name = sc.nextLine();
             System.out.print("Enter Account Number: ");

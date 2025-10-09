@@ -21,10 +21,10 @@ Use this class in main method and ask user to enter number of lines to print.
 import java.util.Scanner;
 
 class PatternThread extends Thread {
+    
     int n; 
-
     PatternThread(int n) {
-        this.n= n;
+        this.n=n;
     }
 
     @Override
