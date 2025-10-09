@@ -93,7 +93,5 @@ class Main extends Bank{
          for(Account a:aobj){
             a.display();
          }
-
     }
-    }
-    
+}
