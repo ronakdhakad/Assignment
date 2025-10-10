@@ -2,7 +2,7 @@
 
 import java.io.*;
 
-class Test {
+class Main{
     public static void main(String[] args) {
         File sourceFile = new File("deepak@deepaks-MacBook-Air Assignment% MyFolder.txt");
         File destFile = new File("deepak@deepaks-MacBook-Air Assignment% newFolder.txt");

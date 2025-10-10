@@ -20,7 +20,7 @@ class Item implements Serializable{
     }
 } 
 
-class Test{
+class Main{
     public static void main(String args[]){
         File file =new File("deepak@deepaks-MacBook-Air Assignment% MyFolder");
         double tms=0;

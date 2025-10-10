@@ -1,7 +1,7 @@
 //2. Write a program to count no of words in a text file and average word size.
 import java.io.*;
 
-class Test {
+class Main{
     public static void main(String[] args) {
         File file = new File("deepak@deepaks-MacBook-Air Assignment% MyFolder2.txt");
         int wordCount = 0;

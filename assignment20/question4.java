@@ -6,7 +6,7 @@
 import java.util.Scanner;
 import java.io.*;
 
-class Test{
+class Main{
     public static void main(String args[]){
         Scanner sc = new Scanner(System.in);
         File file = new File("deepak@deepaks-MacBook-Air Assignment% MyFolder1.txt");

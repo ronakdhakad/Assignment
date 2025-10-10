@@ -3,7 +3,7 @@
 class Computer {}
 class Mouse {}
 
-class Test {
+class Main{
     public static void main(String args[]) {
         Computer s = new Computer();
         Mouse m = new Mouse();

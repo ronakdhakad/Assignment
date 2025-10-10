@@ -1,7 +1,7 @@
 //1. Write a program to count how many times character ‘t’ occurs in a file.
 import java.util.Scanner;
 import java.io.*;
-class Test{
+class Main{
     public static void main(String args[]){
         Scanner sc=new Scanner(System.in);
         System.out.println("Enter content : ");

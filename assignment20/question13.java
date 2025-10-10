@@ -5,7 +5,7 @@ class InvalidAgeException extends Exception{
         super(msg);
     }
 }
-class Test{
+class Main{
     public static void checkAge(int age) throws InvalidAgeException{
         if(age<18){
             throw new InvalidAgeException("Not eligible for voting.");
