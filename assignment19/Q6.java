@@ -20,7 +20,7 @@ class Bank{
 
     void transaction(){
         System.out.print("Do you want to- Withdraw press (1): ");
-        int press =sc.nextInt();
+        int press=sc.nextInt();
         if(press==1){
             System.out.print("Enter deposite Amount : ");
             damt=sc.nextInt();
