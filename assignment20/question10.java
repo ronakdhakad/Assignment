@@ -16,7 +16,7 @@ class Main{
                     try { Thread.sleep(1000); } catch (InterruptedException e) { System.out.println("Exception: " + e); }
                     synchronized (s) {
                         System.out.println("Thread 1 uses System");
-                    }`
+                    }
                 }
             }
             
