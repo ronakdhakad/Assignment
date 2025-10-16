@@ -21,10 +21,8 @@ public class Q15 {
         list2.add(0);
         System.out.println("List1: "+list2);
         
-        System.out.println("Combined list:- ");
-        for(Integer a:list2){
-            System.out.println(list1.add(a));
-        }
-
+        ArrayList<Integer> list3=new ArrayList<>(list1);
+        list3.addAll(list2);
+            System.out.println(list3);
     } 
 }
