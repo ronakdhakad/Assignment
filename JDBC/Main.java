@@ -16,28 +16,30 @@ public class Main{
         }
         try{
             Connection con = DriverManager.getConnection(url,user,password);
-            Statement statement = con.createStatement(); 
-            String query  =String.format("insert into students (name,age ,marks) values ('%s',%o,%f)","ujjwal",20,88.2);
-//            String query = "select * from students";
-            int affectedRows=statement.executeUpdate(query);
-//            while(resultSet.next()){
-//                int id =resultSet.getInt("id");
-//                String name =resultSet.getString("name");
-//                int age =resultSet.getInt("age");S
-//                double marks =resultSet.getDouble("marks");
-//                System.out.println("Id: "+id);
-//                System.out.println("Name: "+name);
-//                System.out.println("Age: "+age);
-//                System.out.println("Marks: "+marks);
-//            }
-if (affectedRows>0){
-    System.out.println("Data Inserted successfully.");
+//            Statement statement = con.createStatement(); 
+            String query  ="select marks from students where   id =?";
+            PreparedStatement ps =con.prepareStatement(query);
+//            ps.setString(1,"ram");
+            ps.setInt(1,1);
+//            ps.setDouble(3,67.8 );
+               
+//            int affectedRows=ps.executeUpdate();
+//if (affectedRows>0){
+//    System.out.println("Data Inserted successfully.");
+//}else{
+//    System.out.println("Data not Inserted");
+//}
+       
+ResultSet rs =ps.executeQuery();
+if(rs.next()){
+    double marks=rs.getDouble("marks");
+    System.out.println("Marks: "+marks);
 }else{
-    System.out.println("Data not Inserted");
+    System.out.println("marks  not found!");
 }
-        }catch(SQLException e){
+   }catch(SQLException e){
             System.out.println(e.getMessage());
-            
+        
         }
     }
 }
