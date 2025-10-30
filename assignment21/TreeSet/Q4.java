@@ -2,6 +2,8 @@
 package assignment21.TreeSet;
 import java.util.TreeSet;
 import java.util.Iterator;
+import java.util.NavigableSet;
+
 
 public class Q4 {
     public static void main(String[] args) {
@@ -9,17 +11,18 @@ public class Q4 {
         set.add("white");
         set.add("pink");
         set.add("gray");
-        set.add("");
+        set.add("red");
         set.add("yellow");
         System.out.println("set: "+set);
-        Iterator itr =set.iterator();
+        Iterator itr =set.descendingIterator();
+                System.out.print("Reverse set: ");
         while(itr.hasNext()){
-            itr.next();
+            System.out.print(itr.next()+" ");
         }
-        while(itr.hasNext()){
-            itr.();
-        }
+        System.out.println("");
+        System.out.println("orignal set: "+set);
         
-        System.out.println("Reverse set: "+set);
+       NavigableSet<String> nav=set.descendingSet();
+        System.out.println("By NavigableSet reverse order: "+nav);
     }
 }
