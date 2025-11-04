@@ -1,0 +1,3131 @@
+  <?php
+  session_start();
+  if (!isset($_SESSION['manager_id'])) {
+    header("Location: login.php");
+    exit();
+  }
+
+  include 'connect1.php'; // your DB connection file
+
+  $manager_id = $_SESSION['manager_id'];
+  $manager_name = $_SESSION['manager_name'];
+
+  // Target section (already added by you)
+  $currentMonth = date('Y-m');
+  $sql = "SELECT * FROM targets WHERE manager_id = ? AND month = ?";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("is", $manager_id, $currentMonth);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  $target = $result->fetch_assoc();
+
+  $total = $target ? (int)$target['target'] : 0;
+  $achieved = $target ? (int)$target['achieved'] : 0;
+  $remaining = max(0, $total - $achieved);
+  $progress = $total > 0 ? round(($achieved / $total) * 100) : 0;
+
+    // 🚀 Shoutout guard (dashboard par safety call)
+  require_once __DIR__ . '/maybe_make_shoutout.php';
+  maybe_make_shoutout($conn, (int)$manager_id, $currentMonth);
+
+
+  $overAmount = max(0, $achieved - $total);
+$isAchieved = ($total > 0 && $achieved >= $total);
+$monthLabel = date('F Y');
+
+
+  // 🔽 This is the new section to fetch accounts
+  $sql2 = "SELECT * FROM accounts WHERE manager_id = ?";
+  $stmt2 = $conn->prepare($sql2);
+  $stmt2->bind_param("i", $manager_id);
+  $stmt2->execute();
+  $accounts = $stmt2->get_result();  // <-- this was NULL in your error
+
+
+$today = date('Y-m-d');
+$workedToday = []; // account_id => 1/0
+
+$ws = $conn->prepare("
+  SELECT account_id, worked
+  FROM accounts_daily_status
+  WHERE manager_id = ? AND status_date = ?
+");
+$ws->bind_param("is", $manager_id, $today);
+$ws->execute();
+$wres = $ws->get_result();
+while ($w = $wres->fetch_assoc()) {
+  $workedToday[(int)$w['account_id']] = (int)$w['worked'];
+}
+$ws->close();
+
+if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(16));
+$CSRF = $_SESSION['csrf'];
+
+
+
+  // 🔔 Accounts with renewal today
+$today = date('Y-m-d');
+$stmtRenewalToday = $conn->prepare("SELECT account_name FROM accounts WHERE manager_id = ? AND renewal_date = ?");
+$stmtRenewalToday->bind_param("is", $manager_id, $today);
+$stmtRenewalToday->execute();
+$resultRenewalToday = $stmtRenewalToday->get_result();
+
+$renewalTodayAccounts = [];
+while ($row = $resultRenewalToday->fetch_assoc()) {
+    $renewalTodayAccounts[] = $row['account_name'];
+}
+
+
+
+
+  // ✅ Count only active (Achieve) accounts
+  $sql3 = "SELECT COUNT(*) AS active_accounts FROM accounts WHERE manager_id = ? AND status = 'Achieve'";
+  $stmt3 = $conn->prepare($sql3);
+  $stmt3->bind_param("i", $manager_id);
+  $stmt3->execute();
+  $result3 = $stmt3->get_result();
+  $row3 = $result3->fetch_assoc();
+  $active_accounts = $row3['active_accounts'];
+
+  ?>
+
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Manager Dashboard</title>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+  <link href="https://unpkg.com/@tabler/icons-webfont/dist/tabler-icons.min.css" rel="stylesheet">
+<!-- 🌌 Particles.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<style>
+  #particles-js {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    background: transparent;
+  }
+</style>
+
+
+    <style>
+      
+    .modal .form-label {
+      font-weight: 600;
+    }
+
+      :root {
+        --bg-light: #f5f7fa;
+        --bg-dark: #1e1e2f;
+        --text-light: #1a1a1a;
+        --text-dark: #f9f9f9;
+        --primary: #4f46e5;
+        --neon: #00ffe0;
+      }
+
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: var(--bg-light);
+        color: var(--text-light);
+        margin:0 20px 0 20px;
+        padding: 0;
+        transition: all 0.3s ease;
+      }
+
+      body.dark {
+        background-color: var(--bg-dark);
+        color: var(--text-dark);
+      }
+
+      .container {
+        padding: 40px 20px;
+        text-align: center;
+      }
+
+      .header {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .header span {
+        background: linear-gradient(135deg, #4f46e5, #06b6d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { letter-spacing: 0px; }
+        50% { letter-spacing: 1px; }
+      }
+
+      .month {
+        font-size: 16px;
+        margin-bottom: 40px;
+        color: gray;
+      }
+
+      .card-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 40px;
+      }
+
+      .card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        width: 200px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+
+      body.dark .card {
+        background: #2c2c3e;
+        color: var(--text-dark);
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0 15px var(--neon);
+      }
+
+      .card h3 {
+        margin: 0 0 10px;
+        font-size: 18px;
+        color: #4f46e5;
+      }
+
+      .card p {
+        font-size: 24px;
+        font-weight: bold;
+      }
+
+      .progress-container {
+        width: 70%;
+        margin: 0 auto 30px;
+        height: 25px;
+        background: #ddd;
+        border-radius: 30px;
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #06b6d4, #4f46e5);
+        width: <?= $progress ?>%;
+        color: white;
+        font-weight: bold;
+        line-height: 25px;
+        transition: width 0.5s ease-in-out;
+      }
+
+      .toggle-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4f46e5;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 14px;
+        box-shadow: 0 0 8px #4f46e5;
+      }
+
+      .toggle-btn:hover {
+        background: #06b6d4;
+        box-shadow: 0 0 12px var(--neon);
+      }
+
+
+
+  /* TABLE UI */
+  
+
+    .table-container {
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      padding: 20px;
+      margin-top: 30px;
+    }
+
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      min-width: 800px;
+      color: #333;
+    }
+
+  .styled-table thead {
+    background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+    color: white;
+  }
+
+
+    .styled-table th,
+    .styled-table td {
+      padding: 14px 18px;
+      text-align: left;
+    }
+
+    .styled-table tbody tr:nth-child(even) {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    .styled-table tbody tr:hover {
+      background: rgba(102, 126, 234, 0.15);
+      cursor: pointer;
+    }
+
+    .status-Achieve {
+      color: #38a169;
+      font-weight: 600;
+    }
+
+    .status-Hold {
+      color: #d69e2e;
+      font-weight: 600;
+    }
+
+    .status-Dead {
+      color: #e53e3e;
+      font-weight: 600;
+    }
+
+    .action-btn {
+      background: #764ba2;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+      background: #5b3f92;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #1a202c;
+      }
+
+      .table-container {
+        background: rgba(26, 32, 44, 0.6);
+        color: #edf2f7;
+      }
+
+      .styled-table thead {
+        background: linear-gradient(to right, #141e30, #243b55);
+      }
+
+      .styled-table tbody tr:nth-child(even) {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      .action-btn {
+        background: #4fd1c5;
+        color: #1a202c;
+      }
+
+      .action-btn:hover {
+        background: #38b2ac;
+      }
+    }
+
+
+
+    /* Make sure to use tbody tr.row-xyz td */
+  tbody tr.row-hold td {
+    color: #00a2ffff !important;   /* Orange */
+    font-weight: 600;
+  }
+
+  tbody tr.row-dead td {
+    color: #ff4d4d !important;   /* Red */
+    font-weight: 600;
+  }
+
+  tbody tr.row-achieve td {
+    color: #050505ff !important;   /* Teal Green */
+    font-weight: 600;
+  }
+
+
+
+
+
+
+  .renewal-toast {
+  position: fixed;
+  top: 100px;
+  right: 30px;
+  background: #fefefe;
+  border-left: 5px solid #ffc107;
+  padding: 16px 20px;
+  border-radius: 8px;
+  z-index: 9999;
+  width: 280px;
+  animation: slideIn 0.5s ease-out;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.15);
+}
+
+.toast-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+}
+
+.toast-list {
+  font-size: 14px;
+  padding-left: 18px;
+  color: #555;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: #888;
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  cursor: pointer;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+/* 🎯 Dark Mode for Add Payment Form */
+body.dark .container form {
+  background-color: rgba(30, 30, 47, 0.95) !important;
+  color: #f1f1f1;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);
+}
+
+body.dark .container form .form-label {
+  color: #d1d5db;
+}
+
+body.dark .container form .form-control,
+body.dark .container form .form-select {
+  background-color: #2c2c3e;
+  color: #f9f9f9;
+  border: 1px solid #444;
+}
+
+body.dark .container form .form-control::placeholder {
+  color: #888;
+}
+
+body.dark .container form .form-control:focus,
+body.dark .container form .form-select:focus {
+  border-color: #58a6ff;
+  box-shadow: 0 0 6px #58a6ff33;
+}
+
+body.dark .btn-primary {
+  background-color: #2563eb;
+  border: none;
+}
+
+body.dark .btn-primary:hover {
+  background-color: #1e40af;
+}
+
+
+
+
+
+
+
+
+
+
+/* payments table ui ------------------------------------------------------------- */
+
+
+
+  </style>
+
+
+
+
+<!-- ================= Celebration UI : PASTE ONCE BEFORE </body> ================= -->
+<style>
+  /* ---------- Emoji Rain ---------- */
+  .emoji-rain{
+    position:fixed; top:-60px; font-size:2rem; z-index:99998; pointer-events:none;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{ to{ transform:translateY(110vh) rotate(360deg); opacity:0; } }
+
+  /* ---------- Celebration Card ---------- */
+  #celebrate-root{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    z-index:99999; pointer-events:none;
+  }
+  .cele-card{
+    position:relative; pointer-events:auto;
+    width:min(92vw,480px); color:#fff; border-radius:18px;
+    background: radial-gradient(1200px 300px at 50% -20%, rgba(255,255,255,.25), rgba(255,255,255,.06)),
+                rgba(10,12,24,.88);
+    border:1px solid rgba(255,255,255,.15);
+    box-shadow:0 24px 60px rgba(0,0,0,.45);
+    backdrop-filter: blur(10px);
+    transform:scale(.95); opacity:0; animation:cele-in .35s ease forwards;
+  }
+  @keyframes cele-in{ to{ opacity:1; transform:scale(1); } }
+  .cele-out{ animation:cele-out .35s ease forwards; }
+  @keyframes cele-out{ to{ opacity:0; transform:translateY(12px) scale(.96); } }
+
+  .cele-glow{
+    position:absolute; inset:-3px; border-radius:inherit; z-index:-1; opacity:.35;
+    background:conic-gradient(from 180deg at 50% 50%, #ffcc00, #ff00aa, #00ccff, #ffcc00);
+    filter:blur(26px);
+  }
+  .cele-header{ display:flex; align-items:center; gap:10px; padding:16px 16px 4px 16px; }
+  .cele-title{
+    margin:0; font-size:1.4rem; letter-spacing:.2px;
+    background:linear-gradient(90deg,#ffd54f,#ff6ec7,#9ad0ff);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .trophy{ font-size:34px; filter:drop-shadow(0 0 10px rgba(255,215,0,.75)); animation:pulse 1.4s infinite; }
+  @keyframes pulse{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+  .cele-close{ margin-left:auto; background:transparent; border:none; color:#fff; font-size:26px; opacity:.75; cursor:pointer; }
+  .cele-close:hover{ opacity:1; }
+  .cele-body{ padding:6px 18px 18px; }
+  .cele-body p{ margin:8px 0 14px; font-size:1rem; line-height:1.6; }
+  .cele-stats{
+    display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin:10px 0 16px;
+  }
+  .cele-stats div{
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.1);
+    padding:10px; border-radius:12px; text-align:center;
+  }
+  .cele-stats span{ display:block; font-size:.78rem; opacity:.8; }
+  .cele-stats strong{ font-size:1.06rem; }
+  .cele-cta{
+    width:100%; background:linear-gradient(90deg,#00e5ff,#7c4dff);
+    border:none; color:#fff; padding:10px 14px; border-radius:12px; cursor:pointer;
+    font-weight:700; letter-spacing:.2px; box-shadow:0 8px 26px rgba(124,77,255,.35);
+  }
+  .cele-cta:hover{ filter:brightness(1.06); }
+</style>
+
+<!-- Root for message card -->
+<div id="celebrate-root"></div>
+
+<!-- Confetti lib (keep outside any <script> blocks) -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<!-- ============== Minimal Side Toast (Celebration) ============== -->
+<style>
+  #celebrate-root{position:fixed;inset:0;pointer-events:none;z-index:99999}
+  .cele-mini{
+    position:fixed; right:20px; bottom:22px; /* 👈 side/bottom-right */
+    max-width: 280px; pointer-events:auto;
+    background: rgba(16,19,33,.92);
+    color:#fff; border:1px solid #ffffff1a; border-radius:12px;
+    padding:10px 12px; box-shadow:0 12px 28px rgba(0,0,0,.35);
+    display:flex; align-items:start; gap:10px; opacity:0; transform:translateY(8px);
+    animation:mini-in .22s ease forwards;
+  }
+  .cele-mini .icon{font-size:18px; line-height:1; margin-top:2px}
+  .cele-mini .title{font-weight:700; font-size:.94rem; margin:0 0 2px}
+  .cele-mini .sub{font-size:.86rem; opacity:.9; margin:0}
+  .cele-mini .x{margin-left:auto;background:transparent;border:0;color:#cbd5e1;font-size:18px;cursor:pointer}
+  .cele-mini .x:hover{color:#fff}
+  @keyframes mini-in{to{opacity:1; transform:none}}
+  .cele-out{animation:mini-out .18s ease forwards}
+  @keyframes mini-out{to{opacity:0; transform:translateY(8px)}}
+
+  /* Light theme fallback */
+  @media (prefers-color-scheme: light){
+    .cele-mini{ background:#ffffff; color:#111827; border-color:#00000012 }
+    .cele-mini .x{ color:#6b7280 }
+    .cele-mini .x:hover{ color:#111827 }
+  }
+
+  /* Respect in-app dark mode toggle (body.dark) */
+  body.dark .cele-mini{
+    background: rgba(16,19,33,.92);
+    color:#f8fafc; border-color:#ffffff1a;
+  }
+</style>
+
+<div id="celebrate-root"></div>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<script>
+(function(){
+  // ---- PHP values (unchanged) ----
+  const METRICS = {
+    total:    <?= (int)$total ?>,
+    achieved: <?= (int)$achieved ?>,
+    name:     <?= json_encode($manager_name) ?>
+  };
+
+  const hitTarget = (METRICS.total > 0 && METRICS.achieved >= METRICS.total);
+  if (!hitTarget) return;
+
+  const overBy = Math.max(0, METRICS.achieved - METRICS.total);
+
+  // tiny & subtle confetti
+  function confettiMini(){
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    confetti({ particleCount: 36, spread: 60, startVelocity: 22, ticks: 120, origin:{ y:0.7 } });
+  }
+
+  // build side toast
+  function showMini(){
+    const root = document.getElementById('celebrate-root');
+    const icon  = overBy>0 ? "🚀" : "🎯";
+    const title = overBy>0 ? "Target Exceeded" : "Target Met";
+    const sub   = overBy>0
+      ? `+₹${overBy.toLocaleString('en-IN')} over.`
+      : `Achieved: ₹${METRICS.achieved.toLocaleString('en-IN')}.`;
+
+    root.innerHTML = `
+      <div class="cele-mini" role="status" aria-live="polite">
+        <div class="icon" aria-hidden="true">${icon}</div>
+        <div class="txt">
+          <p class="title">${title}</p>
+          <p class="sub">${sub}</p>
+        </div>
+        <button class="x" aria-label="Close">&times;</button>
+      </div>
+    `;
+
+    const el = root.querySelector('.cele-mini');
+    const x  = root.querySelector('.x');
+    const dismiss = ()=>{ el.classList.add('cele-out'); setTimeout(()=> root.innerHTML='', 180); };
+
+    x.addEventListener('click', dismiss);
+    setTimeout(dismiss, 5000); // auto-dismiss after 5s
+  }
+
+  requestAnimationFrame(()=>{
+    confettiMini();
+    showMini();
+  });
+})();
+</script>
+<!-- ============== /Minimal Side Toast ============== -->
+
+
+
+
+
+
+  </head>
+  <body>
+<div id="particles-js"></div>
+
+<!-- 🌗 Theme Toggle -->
+<button id="themeToggle" class="toggle-btn">🌙/☀️</button>
+
+<!-- 🧮 Calculator Button -->
+<button id="openCalcBtn" class="toggle-btn" style="right: 100px; background:#4f46e5;">
+  🧮 Calculator
+</button>
+
+<!-- 🗒️ Sticky Note Button -->
+<button id="toggleNote" class="toggle-btn" style="right: 200px; background:#06b6d4;margin-right:20px;">
+  🗒️ Note
+</button>
+
+
+<!-- ⚡ Calculator Modal -->
+<div id="calcModal" class="calc-modal">
+  <div class="calc-card">
+    <div class="calc-head">
+      <h4>Calculator</h4>
+      <button class="calc-close" id="closeCalcBtn">×</button>
+    </div>
+
+    <input type="text" id="calcDisplay" class="calc-display" readonly>
+
+    <div class="calc-grid">
+      <button onclick="press('7')">7</button>
+      <button onclick="press('8')">8</button>
+      <button onclick="press('9')">9</button>
+      <button class="op" onclick="press('/')">÷</button>
+
+      <button onclick="press('4')">4</button>
+      <button onclick="press('5')">5</button>
+      <button onclick="press('6')">6</button>
+      <button class="op" onclick="press('*')">×</button>
+
+      <button onclick="press('1')">1</button>
+      <button onclick="press('2')">2</button>
+      <button onclick="press('3')">3</button>
+      <button class="op" onclick="press('-')">−</button>
+
+      <button onclick="press('0')">0</button>
+      <button onclick="press('.')">.</button>
+      <button onclick="press('%')">%</button>
+      <button class="op" onclick="press('+')">+</button>
+
+      <button class="eq" onclick="calculate()">=</button>
+      <button class="clear" onclick="clearCalc()">C</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ----------- Calculator Script ----------- */
+const calcModal = document.getElementById('calcModal');
+const openBtn = document.getElementById('openCalcBtn');
+const closeBtn = document.getElementById('closeCalcBtn');
+const display = document.getElementById('calcDisplay');
+
+// open & close
+openBtn.addEventListener('click', ()=>{ calcModal.style.display='flex'; display.focus(); });
+closeBtn.addEventListener('click', ()=> calcModal.style.display='none');
+window.addEventListener('click', (e)=>{ if(e.target===calcModal) calcModal.style.display='none'; });
+
+// main functions
+function press(v){ display.value += v; }
+function clearCalc(){ display.value=''; }
+function calculate(){
+  try {
+    let expr = display.value.replace(/%/g, '/100'); // convert % to /100
+    display.value = eval(expr) || '';
+  } catch {
+    display.value = 'Error';
+  }
+}
+
+// keyboard control
+document.addEventListener('keydown', (e)=>{
+  if(calcModal.style.display !== 'flex') return; // active only when open
+  const key = e.key;
+  if(/[0-9+\-*/.%]/.test(key)) press(key);
+  else if(key==='Enter' || key==='='){ e.preventDefault(); calculate(); }
+  else if(key==='Backspace'){ e.preventDefault(); display.value = display.value.slice(0,-1); }
+  else if(key==='Delete'){ e.preventDefault(); clearCalc(); }
+  else if(key==='Escape'){ calcModal.style.display='none'; }
+});
+</script>
+
+
+
+
+
+
+<!-- 🗒️ Sticky Note -->
+<div id="stickyNote" class="sticky-note">
+  <div class="note-header">
+    <span>🗒️ Sticky Note</span>
+    <button id="closeNote" class="note-btn">×</button>
+  </div>
+  <textarea id="noteContent" placeholder="Write your notes here..."></textarea>
+  <div class="note-actions">
+    <button id="clearNoteBtn">🧹 Clear</button>
+  </div>
+</div>
+
+<style>
+/* ----------- Sticky Note Styling ----------- */
+.sticky-note {
+  position: fixed;
+  top: 120px;
+  left: 100px;
+  width: 260px;
+  min-width: 220px;
+  min-height: 200px;
+  background: #fffbe6;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  border: 1px solid #e5e7eb;
+  z-index: 9999;
+  overflow: hidden;
+  resize: both;
+  display: flex;
+  flex-direction: column;
+}
+body.dark .sticky-note {
+  background: #1f2437;
+  border-color: #3f455d;
+  color: #f1f1f1;
+}
+.note-header {
+  background: #facc15;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  cursor: move;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #111;
+}
+.note-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+.note-btn:hover { color: #ef4444; }
+#noteContent {
+  flex: 1;
+  border: none;
+  padding: 8px;
+  background: transparent;
+  resize: none;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  color: inherit;
+  overflow-y: auto;
+}
+.note-actions {
+  text-align: right;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  padding: 6px 8px;
+}
+.note-actions button {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.note-actions button:hover { background: #dc2626; }
+</style>
+
+<script>
+const manager_id = <?= (int)$manager_id ?>;
+const toggleNote = document.getElementById('toggleNote');
+const stickyNote = document.getElementById('stickyNote');
+const noteContent = document.getElementById('noteContent');
+const clearNoteBtn = document.getElementById('clearNoteBtn');
+const closeNote = document.getElementById('closeNote');
+const noteHeader = document.querySelector('.note-header');
+
+// ✅ Toggle open/close with button
+toggleNote.addEventListener('click', async () => {
+  // If hidden, show and load from DB
+  if (stickyNote.style.display === 'none' || stickyNote.style.display === '') {
+    stickyNote.style.display = 'flex';
+    const res = await fetch('get_sticky_note.php?manager_id=' + manager_id);
+    noteContent.value = await res.text();
+  } else {
+    stickyNote.style.display = 'none';
+  }
+});
+
+// ❌ Close note
+closeNote.addEventListener('click', () => stickyNote.style.display = 'none');
+
+// 🧠 Auto-save to DB when typing
+let noteTimer;
+noteContent.addEventListener('input', () => {
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(saveNoteToDB, 1000);
+});
+async function saveNoteToDB() {
+  const fd = new FormData();
+  fd.append('manager_id', manager_id);
+  fd.append('content', noteContent.value);
+  await fetch('save_sticky_note.php', { method: 'POST', body: fd });
+}
+
+// 🧹 Clear note manually
+clearNoteBtn.addEventListener('click', async () => {
+  if (confirm('Clear this note?')) {
+    noteContent.value = '';
+    await saveNoteToDB();
+  }
+});
+
+// 🖱️ Drag feature
+let isDragging = false, offsetX, offsetY;
+noteHeader.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  offsetX = e.clientX - stickyNote.offsetLeft;
+  offsetY = e.clientY - stickyNote.offsetTop;
+});
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  stickyNote.style.left = `${e.clientX - offsetX}px`;
+  stickyNote.style.top = `${e.clientY - offsetY}px`;
+});
+document.addEventListener('mouseup', () => isDragging = false);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="summary-container">
+  <div class="summary-header">
+    <h1>Welcome, <span><?= htmlspecialchars($manager_name) ?> 👋</span></h1>
+    <p>Month: <?= date("F Y") ?></p>
+  </div>
+
+  <div class="cards-wrapper">
+    <div class="summary-card">
+      <h3>Total Target 🎯</h3>
+      <p><?= $total ?></p>
+    </div>
+    <div class="summary-card">
+      <h3>Achieved ✅</h3>
+      <p><?= $achieved ?></p>
+    </div>
+    <div class="summary-card">
+      <h3>Remaining 📉</h3>
+      <p><?= $remaining ?></p>
+    </div>
+    <div class="summary-card">
+      <h3>Active Account 🔥</h3>
+      <p><?= $active_accounts ?></p>
+    </div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-label">Progress</div>
+    <div class="progress-track">
+      <div class="progress-fill" style="width: <?= $progress ?>%;"></div>
+    </div>
+    <div class="progress-percent"><?= $progress ?>%</div>
+  </div>
+</div>
+
+<style>
+.calc-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+}
+.calc-card {
+  width: 320px;
+  background: rgba(255,255,255,0.94);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+  animation: fadeIn .3s ease;
+  color: #111;
+}
+body.dark .calc-card {
+  background: rgba(30,32,47,0.96);
+  color: #f1f1f1;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
+.calc-head {
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;
+}
+.calc-head h4{font-weight:700;font-size:1.2rem;margin:0}
+.calc-close{background:none;border:none;font-size:22px;cursor:pointer;color:inherit;transition:.2s}
+.calc-close:hover{color:#4f46e5}
+.calc-display{
+  width:100%;height:50px;border:1px solid #ccc;border-radius:10px;text-align:right;
+  padding:8px 12px;font-size:1.4rem;font-weight:600;background:#f9fafb;color:#111;
+  margin-bottom:14px;box-shadow:inset 0 1px 3px rgba(0,0,0,.08);
+}
+body.dark .calc-display{background:#1e1e2f;color:#fff;border-color:#444}
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.calc-grid button{
+  height:48px;border:1px solid #d1d5db;border-radius:10px;background:#fff;font-size:1.1rem;
+  font-weight:600;color:#111;cursor:pointer;transition:all .2s ease;box-shadow:0 1px 3px rgba(0,0,0,.1);
+}
+.calc-grid button:hover{background:#f3f4f6}
+body.dark .calc-grid button{background:#2a2f45;color:#e5e7eb;border-color:#3f455d;box-shadow:0 2px 5px rgba(0,0,0,.3)}
+body.dark .calc-grid button:hover{background:#39405a}
+.calc-grid .op{background:#f1f5f9;color:#4f46e5}
+body.dark .calc-grid .op{background:#3b3f5c;color:#8b9fff}
+.calc-grid .eq{background:#4f46e5;color:#fff}
+.calc-grid .eq:hover{background:#4338ca}
+.calc-grid .clear{grid-column:span 4;background:#ef4444;color:#fff;border:none}
+.calc-grid .clear:hover{background:#dc2626}
+@keyframes fadeIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+
+
+
+
+
+
+
+
+
+
+/* ✨ Container Layout */
+.summary-container {
+  text-align: center;
+  margin: 60px auto;
+  padding: 30px;
+  max-width: 950px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+body.dark .summary-container {
+  background: rgba(17, 24, 39, 0.6);
+  color: #f1f5f9;
+}
+
+/* 🌟 Header */
+.summary-header h1 {
+  font-weight: 800;
+  font-size: 1.8rem;
+  margin-bottom: 0.3rem;
+  background: linear-gradient(90deg,#6366f1,#06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.summary-header p {
+  color: #6b7280;
+  margin-bottom: 30px;
+  font-weight: 500;
+}
+body.dark .summary-header p { color: #a1a1aa; }
+
+/* 📊 Cards */
+.cards-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 35px;
+}
+.summary-card {
+  flex: 1 1 200px;
+  min-width: 200px;
+  max-width: 220px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 16px;
+  padding: 20px 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(99,102,241,0.3);
+}
+.summary-card h3 {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+.summary-card p {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #111827;
+}
+body.dark .summary-card {
+  background: rgba(30,41,59,0.8);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+}
+body.dark .summary-card h3 { color: #a1a1aa; }
+body.dark .summary-card p { color: #f9fafb; }
+
+/* 📈 Progress Bar */
+.progress-section {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.progress-label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #6b7280;
+}
+body.dark .progress-label { color: #a1a1aa; }
+.progress-track {
+  height: 16px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.1);
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);
+  background-size: 200%;
+  animation: moveGradient 5s linear infinite;
+  transition: width 0.8s ease;
+}
+@keyframes moveGradient { to { background-position: -200% center; } }
+.progress-percent {
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+/* 🌙 Theme Toggle Button */
+.toggle-btn {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  background: linear-gradient(135deg,#4f46e5,#06b6d4);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(79,70,229,0.3);
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+.toggle-btn:hover { transform: scale(1.05); }
+</style>
+
+  <div class="d-flex gap-2 mb-4">
+   <button class="btn btn-success" type="button" onclick="AAAdd.open()">
+  <i class="ti ti-plus me-1"></i> Add New Account
+</button>
+
+
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#selectAccountModal">
+      <i class="ti ti-edit me-1"></i> Edit Account
+    </button>
+  </div>
+<!-- =============== Add Account — Mini Premium Modal (no Bootstrap) =============== -->
+<style>
+  :root{
+    --aa-accent:#16a34a;          /* green */
+    --aa-bg:rgba(15,18,28,.92);   /* card bg */
+    --aa-txt:#e5e7eb;             /* text */
+    --aa-muted:#9ca3af;
+    --aa-ring:#22c55e;
+    --aa-stroke:rgba(255,255,255,.08);
+    --aa-shadow:0 18px 60px rgba(0,0,0,.45);
+    --aa-rad:16px;
+    --aa-gap:10px;                /* compact spacing */
+    --aa-in-h:38px;               /* input height */
+    --aa-fs:13.5px;               /* base font */
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --aa-bg:rgba(255,255,255,.96);
+      --aa-txt:#0f172a;
+      --aa-muted:#6b7280;
+      --aa-stroke:rgba(0,0,0,.08);
+      --aa-shadow:0 18px 40px rgba(15,23,42,.15);
+      --aa-ring:#16a34a;
+    }
+  }
+
+  /* Backdrop */
+  .aaadd-backdrop{
+    position:fixed; inset:0; z-index:9999;
+    background:rgba(0,0,0,.55);
+    backdrop-filter:saturate(110%) blur(2px);
+    display:none;
+  }
+  .aaadd-backdrop.show{ display:block; }
+
+  /* Modal card */
+  .aaadd{
+    position:absolute; inset:auto; left:50%; top:50%;
+    transform:translate(-50%,-50%) scale(.98);
+    width:min(680px,96vw); max-height:86vh; overflow:auto;
+    background:
+      linear-gradient(var(--aa-bg),var(--aa-bg)) padding-box,
+      linear-gradient(120deg,rgba(34,197,94,.35),rgba(59,130,246,.25)) border-box;
+    border:1px solid transparent; border-radius:var(--aa-rad);
+    color:var(--aa-txt); box-shadow:var(--aa-shadow);
+    animation:aaPop .18s ease forwards;
+  }
+  @keyframes aaPop{
+    to{ transform:translate(-50%,-50%) scale(1); opacity:1 }
+    from{ opacity:0 }
+  }
+
+  .aaadd-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 14px; border-bottom:1px solid var(--aa-stroke);
+    position:sticky; top:0; background:var(--aa-bg); z-index:2;
+    border-top-left-radius:var(--aa-rad); border-top-right-radius:var(--aa-rad);
+  }
+  .aaadd-title{ font-weight:800; font-size:15px; letter-spacing:.2px; display:flex; gap:8px; align-items:center; }
+  .aaadd-pill{
+    display:inline-block; font-weight:800; font-size:11px; letter-spacing:.4px;
+    padding:2px 8px; border-radius:999px; color:#fff;
+    background:linear-gradient(90deg,#22c55e,#10b981);
+    box-shadow:0 8px 18px rgba(16,185,129,.25);
+  }
+  .aaadd-close{
+    appearance:none; border:0; background:transparent; cursor:pointer;
+    width:32px; height:32px; border-radius:10px; color:var(--aa-muted);
+    display:grid; place-items:center; font-size:18px;
+  }
+  .aaadd-close:hover{ background:rgba(255,255,255,.08); color:#fff; }
+  .aaadd-close:focus-visible{ outline:2px solid var(--aa-ring); outline-offset:2px; }
+
+  .aaadd-body{ padding:14px; display:grid; gap:12px; }
+
+  /* Compact grid: 2 columns */
+  .aa-grid{
+    display:grid; gap:var(--aa-gap);
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .aa-span-2{ grid-column:1 / -1; }
+
+  /* Field */
+  .aa-field{ display:flex; flex-direction:column; gap:6px; }
+  .aa-label{ font-size:12px; font-weight:700; letter-spacing:.2px; color:var(--aa-muted); }
+  .aa-input, .aa-select, .aa-textarea{
+    height:var(--aa-in-h); padding:0 12px;
+    border-radius:12px; border:1px solid var(--aa-stroke);
+    background:rgba(255,255,255,.04); color:var(--aa-txt);
+    font-size:var(--aa-fs); outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .aa-textarea{ height:auto; min-height:78px; padding:10px 12px; resize:vertical; }
+  .aa-input::placeholder, .aa-textarea::placeholder{ color:var(--aa-muted); }
+  .aa-input:focus, .aa-select:focus, .aa-textarea:focus{
+    border-color:rgba(34,197,94,.6);
+    box-shadow:0 0 0 3px rgba(34,197,94,.18);
+    background:rgba(255,255,255,.06);
+  }
+
+  /* Footer */
+  .aaadd-foot{
+    padding:12px 14px; border-top:1px solid var(--aa-stroke);
+    position:sticky; bottom:0; background:var(--aa-bg); z-index:2;
+    border-bottom-left-radius:var(--aa-rad); border-bottom-right-radius:var(--aa-rad);
+  }
+  .aa-btn{
+    width:100%; height:40px; border-radius:12px; border:0; cursor:pointer;
+    color:#fff; font-weight:800; letter-spacing:.25px; font-size:14px;
+    background:linear-gradient(90deg,#16a34a,#22c55e); box-shadow:0 10px 24px rgba(34,197,94,.25);
+  }
+  .aa-btn:hover{ filter:brightness(1.05); }
+  .aa-btn:active{ transform:translateY(1px); }
+
+  /* Mobile: single column */
+  @media (max-width:640px){
+    .aa-grid{ grid-template-columns:1fr; }
+    .aa-span-2{ grid-column:auto; }
+  }
+
+  /* Prevent body scroll when open */
+  .aa-noscroll{ overflow:hidden; }
+</style>
+
+<div id="aaadd-modal" class="aaadd-backdrop" aria-hidden="true">
+  <div class="aaadd" role="dialog" aria-modal="true" aria-labelledby="aaadd-title">
+    <div class="aaadd-head">
+      <div class="aaadd-title" id="aaadd-title">
+        <span>➕ Add New Account</span>
+        <span class="aaadd-pill">QUICK</span>
+      </div>
+      <button class="aaadd-close" type="button" onclick="AAAdd.close()" aria-label="Close">×</button>
+    </div>
+
+    <form class="aaadd-body" action="add_account.php" method="POST" id="aaadd-form">
+      <div class="aa-grid">
+        <!-- Row 1 -->
+        <div class="aa-field">
+          <label class="aa-label">Account Name</label>
+          <input class="aa-input" type="text" name="account_name" required>
+        </div>
+        <div class="aa-field">
+          <label class="aa-label">Assign Date</label>
+          <input class="aa-input" type="date" name="assign_date" required>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="aa-field">
+          <label class="aa-label">Renewal Date</label>
+          <input class="aa-input" type="date" name="renewal_date">
+        </div>
+        <div class="aa-field">
+          <label class="aa-label">Payment (₹)</label>
+          <input class="aa-input" type="text" name="payment" placeholder="e.g., 1500">
+        </div>
+
+        <!-- Row 3 -->
+        <div class="aa-field">
+          <label class="aa-label">Sales Person</label>
+          <input class="aa-input" type="text" name="sales_person">
+        </div>
+        <div class="aa-field">
+          <label class="aa-label">Email</label>
+          <input class="aa-input" type="email" name="email">
+        </div>
+
+        <!-- Row 4 -->
+        <div class="aa-field">
+          <label class="aa-label">User ID</label>
+          <input class="aa-input" type="text" name="user_id" required>
+        </div>
+        <div class="aa-field">
+          <label class="aa-label">Password</label>
+          <input class="aa-input" type="text" name="password">
+        </div>
+
+        <!-- Row 5 -->
+        <div class="aa-field">
+          <label class="aa-label">Contact</label>
+          <input class="aa-input" type="text" name="contact">
+        </div>
+        <div class="aa-field">
+          <label class="aa-label">City</label>
+          <input class="aa-input" type="text" name="city">
+        </div>
+
+        <!-- Row 6 -->
+        <div class="aa-field">
+          <label class="aa-label">Category</label>
+          <input class="aa-input" type="text" name="category">
+        </div>
+        <div class="aa-field">
+          <label class="aa-label">Status</label>
+          <select class="aa-select" name="status">
+            <option value="Achieve">Active</option>
+            <option value="Hold">Hold</option>
+            <option value="Dead">Dead</option>
+          </select>
+        </div>
+
+        <!-- Row 7 (full) -->
+        <div class="aa-field aa-span-2">
+          <label class="aa-label">Comment</label>
+          <textarea class="aa-textarea" name="comment" rows="3" placeholder="Write any comment..."></textarea>
+        </div>
+
+        <!-- Row 8 -->
+        <div class="aa-field">
+          <label class="aa-label">Access ID</label>
+          <input class="aa-input" type="text" name="access_id">
+        </div>
+        <!-- Empty cell to keep grid balanced -->
+        <div></div>
+      </div>
+    </form>
+
+    <div class="aaadd-foot">
+      <button class="aa-btn" type="submit" form="aaadd-form">Save Account</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tiny controller (open/close + esc + backdrop click)
+  window.AAAdd = {
+    el: document.getElementById('aaadd-modal'),
+    open(){
+      this.el.classList.add('show');
+      document.body.classList.add('aa-noscroll');
+      // focus first input
+      setTimeout(()=>{
+        const first = this.el.querySelector('input,select,textarea,button');
+        first && first.focus();
+      }, 10);
+    },
+    close(){
+      this.el.classList.remove('show');
+      document.body.classList.remove('aa-noscroll');
+    }
+  };
+  // Close on ESC
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape' && AAAdd.el.classList.contains('show')) AAAdd.close();
+  });
+  // Close on backdrop click (but ignore clicks inside card)
+  document.getElementById('aaadd-modal').addEventListener('click', e=>{
+    if(e.target.id==='aaadd-modal') AAAdd.close();
+  });
+</script>
+<!-- =============== /Add Account Modal =============== -->
+
+
+
+  <!-- Select Account to Edit Modal -->
+  <!-- Select Account Modal -->
+  <div class="modal fade" id="selectAccountModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5>Select Account to Edit</h5>
+        </div>
+        <div class="modal-body">
+          <select id="accountSelector" class="form-select">
+  <option value="">-- Select Account --</option>
+  <?php
+    $result = $conn->query("SELECT id, account_name FROM accounts WHERE manager_id = ".$_SESSION['manager_id']." AND status != 'Dead'");
+    while($row = $result->fetch_assoc()) {
+      echo "<option value='{$row['id']}'>{$row['account_name']}</option>";
+    }
+  ?>
+</select>
+
+        </div>  
+      </div>
+    </div>
+  </div>
+
+
+
+ <!-- ===== Edit Account Modal (UI upgraded) ===== -->
+<style>
+  /* Glassy compact modal */
+  .edit-modal .modal-content{
+    background: rgba(255,255,255,.9);
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    backdrop-filter: blur(8px);
+  }
+  @media (prefers-color-scheme: dark){
+    .edit-modal .modal-content{
+      background: rgba(15,18,28,.9);
+      border-color: rgba(255,255,255,.08);
+      color: #e5e7eb;
+    }
+  }
+  .edit-modal .modal-header{
+    border: 0;
+    padding: 14px 18px;
+    background:
+      radial-gradient(120% 120% at 0% 0%, rgba(34,197,94,.08), transparent 60%),
+      radial-gradient(120% 120% at 100% 0%, rgba(14,165,233,.08), transparent 60%);
+  }
+  .edit-modal .modal-title{
+    font-weight: 800; letter-spacing:.2px; margin:0;
+    display:flex; align-items:center; gap:.5rem;
+  }
+  .edit-modal .badge-soft{
+    background: rgba(34,197,94,.12);
+    color:#16a34a; font-weight:800; padding:.2rem .5rem; border-radius:999px;
+  }
+  @media (prefers-color-scheme: dark){
+    .edit-modal .badge-soft{ color:#86efac; }
+  }
+
+  .edit-modal .modal-body{ padding: 0; }
+  .edit-modal #editAccountFormContainer{ padding: 16px; }
+
+  /* Compact fields inside loaded form */
+  .edit-modal input.form-control,
+  .edit-modal select.form-select,
+  .edit-modal textarea.form-control{
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,.12);
+    background: rgba(255,255,255,.85);
+    padding: .45rem .65rem;
+    min-height: 38px;
+  }
+  @media (prefers-color-scheme: dark){
+    .edit-modal input.form-control,
+    .edit-modal select.form-select,
+    .edit-modal textarea.form-control{
+      border-color: rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color:#e5e7eb;
+    }
+  }
+  .edit-modal .form-label{
+    font-weight: 700; font-size: .9rem; margin-bottom: .25rem;
+  }
+  .edit-modal .form-text{ color:#64748b; }
+  @media (prefers-color-scheme: dark){
+    .edit-modal .form-text{ color:#94a3b8; }
+  }
+
+  /* Skeleton loader */
+  .ea-skeleton{ display:grid; gap:12px; padding:16px; }
+  .ea-shine{
+    width: 100%;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(90deg,
+      rgba(0,0,0,.06), rgba(0,0,0,.12), rgba(0,0,0,.06));
+    animation: eaShimmer 1.15s infinite linear;
+  }
+  .ea-shine.sm{ height: 16px; width: 40%; border-radius: 6px; }
+  @media (prefers-color-scheme: dark){
+    .ea-shine{
+      background: linear-gradient(90deg,
+        rgba(255,255,255,.06), rgba(255,255,255,.12), rgba(255,255,255,.06));
+    }
+  }
+  @keyframes eaShimmer{
+    0%{ background-position: -200% 0; }
+    100%{ background-position: 200% 0; }
+  }
+</style>
+
+<div class="modal fade edit-modal" id="editAccountModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <span class="badge-soft">Edit</span> Account Details
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- skeleton shown until AJAX loads form -->
+        <div id="editAccountFormContainer">
+          <div class="ea-skeleton">
+            <div class="ea-shine sm"></div>
+            <div class="ea-shine"></div>
+            <div class="ea-shine sm"></div>
+            <div class="ea-shine"></div>
+            <div class="ea-shine sm"></div>
+            <div class="ea-shine"></div>
+          </div>
+        </div>
+      </div>
+      <!-- (no footer; the loaded form usually contains its own submit buttons) -->
+    </div>
+  </div>
+</div>
+
+<script>
+  // Helper: show skeleton quickly
+  function showEditSkeleton(){
+    const s = `
+      <div class="ea-skeleton">
+        <div class="ea-shine sm"></div>
+        <div class="ea-shine"></div>
+        <div class="ea-shine sm"></div>
+        <div class="ea-shine"></div>
+        <div class="ea-shine sm"></div>
+        <div class="ea-shine"></div>
+      </div>`;
+    document.getElementById('editAccountFormContainer').innerHTML = s;
+  }
+
+  // Attach to your selector (must exist on page)
+  const selector = document.getElementById('accountSelector');
+  if (selector){
+    selector.addEventListener('change', function () {
+      const accountId = this.value;
+      if (!accountId) return;
+
+      showEditSkeleton();
+
+      fetch(`update_form.php?id=${encodeURIComponent(accountId)}`, { cache:'no-store' })
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to load form');
+          return res.text();
+        })
+        .then(html => {
+          const box = document.getElementById('editAccountFormContainer');
+          box.innerHTML = html;
+
+          // Focus first field if present
+          const firstInput = box.querySelector('input, select, textarea');
+          if (firstInput) firstInput.focus({ preventScroll: true });
+
+          // Open modal after content set
+          new bootstrap.Modal(document.getElementById('editAccountModal')).show();
+        })
+        .catch(() => {
+          document.getElementById('editAccountFormContainer').innerHTML =
+            `<div class="p-3 text-danger">Unable to load form. Please try again.</div>`;
+          new bootstrap.Modal(document.getElementById('editAccountModal')).show();
+        });
+    });
+  }
+</script>
+
+
+
+
+
+
+
+  <!-- 💎 Modern Table Style -->
+  <!-- 💎 Modern Table Style -->
+  <style>
+    .glass-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .table-container-scroll {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    .modern-table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 1400px; /* ⚠️ Important for scroll */
+    }
+
+    .modern-table th,
+    .modern-table td {
+      padding: 12px 16px;
+      text-align: center;
+      border: 1px solid #dee2e6;
+      white-space: nowrap;        /* 👈 Prevents line break */
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+
+
+
+
+.modern-table thead {
+  background-color: #f1f3f5;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  color: #1a1a1a;
+}
+
+.modern-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+  color: #1a1a1a;
+}
+
+.modern-table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+  color: #1a1a1a;
+}
+
+body.dark .modern-table thead {
+  background-color: #1f1f2f !important;
+  color: #f9f9f9 !important;
+}
+
+body.dark .modern-table tbody tr:nth-child(odd),
+body.dark .modern-table tbody tr:nth-child(even) {
+  background-color: #2c2c3e !important;
+  color: #f9f9f9 !important;
+}
+
+body.dark .modern-table td,
+body.dark .modern-table th {
+  border-color: #444 !important;
+  color: #f9f9f9 !important;
+  background-color: #2c2c3e !important;
+}
+
+body.dark .modern-table .sticky-col {
+  background-color: #242437 !important;
+  color: #f9f9f9 !important;
+}
+
+body.dark .modern-table .status-badge {
+  color: #fff;
+}
+
+body.dark .modern-table .status-Achieve {
+  background-color: #22543d;
+  color: #d1e7dd;
+}
+
+body.dark .modern-table .status-Hold {
+  background-color: #5f370e;
+  color: #fff3cd;
+}
+
+body.dark .modern-table .status-Dead {
+  background-color: #742a2a;
+  color: #f8d7da;
+}
+
+/* 🔥 Dark Mode for Glass Card & Container */
+body.dark .glass-card {
+  background-color: #1e1e2f !important;
+  color: #f9f9f9 !important;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+body.dark .table-container-scroll {
+  background-color: transparent !important;
+}
+
+body.dark .modern-table {
+  background-color: transparent !important;
+}
+
+body.dark .modern-table td span,
+body.dark .modern-table td {
+  color: #f9f9f9 !important;
+}
+
+body.dark .modern-table .account-name-hold {
+  color: #ffae42 !important;
+  text-shadow: 0px 0px 2px #ffc107;
+}
+
+.status-badge {
+      padding: 4px 10px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status-Achieve {
+      background-color: #d1e7dd;
+      color: #0f5132;
+    }
+
+    .status-Hold {
+      background-color: #fff3cd;
+      color: #664d03;
+    }
+
+    .status-Dead {
+      background-color: #f8d7da;
+      color: #842029;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* 🌑 Dark Mode Styling for Payments Table */
+body.dark .table-container {
+  background-color: #1e1e2f;
+  color: #f1f1f1;
+}
+
+body.dark .styled-table {
+  background-color: #1e1e2f;
+  color: #f1f1f1;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+body.dark .styled-table th,
+body.dark .styled-table td {
+  color: #e0e0e0;
+  border: 1px solid #444;
+}
+
+body.dark .styled-table thead {
+  background-color: #2c2c3e;
+}
+
+body.dark .styled-table tbody tr:nth-child(even) {
+  background-color: #262635;
+}
+
+body.dark .styled-table tbody tr:hover {
+  background-color: #33334a;
+}
+
+body.dark .styled-table a.btn {
+  color: #fff;
+}
+
+body.dark .btn-primary {
+  background-color: #3b82f6;
+  border: none;
+}
+
+body.dark .btn-danger {
+  background-color: #ef4444;
+  border: none;
+}
+
+body.dark .btn-primary:hover {
+  background-color: #2563eb;
+}
+
+body.dark .btn-danger:hover {
+  background-color: #dc2626;
+}
+/* Sticky first column (tbody cells) */
+.sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 1;                 /* header se niche rahe */
+  background-color: #ffffff;  /* solid bg taaki bleed na ho */
+}
+
+/* Hold styling */
+.account-name-hold {
+  color: #ff8800 !important;
+  font-weight: 600;
+  padding: 2px 6px;
+}
+
+/* Table container with vertical & horizontal scroll */
+.table-container-scroll {
+  max-height: 500px;   /* need ke hisaab se change kar sakte ho */
+  overflow-y: auto;     /* vertical scroll */
+  overflow-x: auto;     /* horizontal scroll */
+}
+
+/* Sticky top header (all th) */
+.modern-table thead th {
+  position: sticky;
+  top: 0;                       /* top pe chipka rahe */
+  background: #fff;             /* solid header bg */
+  z-index: 10;                  /* tbody se upar */
+  box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+}
+
+/* 🧩 Corner cell (top-left header = Account Name) — sabse upar hona chahiye */
+.modern-table thead th.sticky-col {
+  z-index: 15;                  /* baaki headers se bhi upar */
+  background: #f1f3f5;          /* header ka thoda alag bg (optional) */
+}
+
+/* 🌑 Dark mode adjustments (optional but recommended) */
+body.dark .modern-table thead th {
+  background: #1f1f2f !important;
+  color: #f9f9f9 !important;
+}
+
+body.dark .sticky-col {
+  background-color: #242437 !important;
+  color: #f9f9f9 !important;
+}
+
+body.dark .modern-table thead th.sticky-col {
+  background: #1f1f2f !important;
+}
+
+
+  </style>
+
+<!-- 
+
+
+  <style>
+    .glass-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .table-container-scroll {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    .modern-table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 1400px;
+    }
+
+    .modern-table th,
+    .modern-table td {
+      padding: 12px 16px;
+      text-align: center;
+      border: 1px solid #dee2e6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background-color: white; /* Needed for sticky */
+    }
+
+    .modern-table thead {
+      background-color: #f1f3f5;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .modern-table tbody tr:nth-child(odd) {
+      background-color: #ffffff;
+    }
+
+    .modern-table tbody tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    /* 🧊 Sticky Column for Account Name */
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background-color: #ffffff;
+    }
+
+    .modern-table thead .sticky-col {
+      z-index: 3; /* header above body */
+      background-color: #f1f3f5;
+    }
+
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status-Achieve { background-color: #d1e7dd; color: #0f5132; }
+    .status-Hold { background-color: #fff3cd; color: #664d03; }
+    .status-Dead { background-color: #f8d7da; color: #842029; }
+
+
+    .account-name-hold {
+  color: #ff8800;
+  font-weight: 700;
+  font-style: italic;
+  text-shadow: 0px 0px 2px #ffc107;
+} -->
+
+
+
+
+
+
+
+  </style>
+
+
+
+  
+<div class="container-fluid mt-5">
+  <div class="glass-card">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <h4 class="text-primary fw-bold mb-0">✨ Account Overview</h4>
+      <div id="resultCount" class="text-muted small"></div>
+    </div>
+
+    <!-- 🔍 Filter Bar -->
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <input type="text" id="accountSearch" class="form-control" style="max-width:260px" placeholder="🔍 Search accounts...">
+
+      <select id="statusFilter" class="form-select" style="max-width:160px">
+        <option value="">All Status</option>
+        <option value="Achieve">Active</option>
+        <option value="Hold">Hold</option>
+        <option value="Dead">Dead</option>
+      </select>
+
+      <select id="categoryFilter" class="form-select" style="max-width:200px">
+        <option value="">All Categories</option>
+        <?php
+          $cats = $conn->query("SELECT DISTINCT category FROM accounts WHERE manager_id = ".$_SESSION['manager_id']." AND category IS NOT NULL AND category != ''");
+          while($c = $cats->fetch_assoc()) {
+            echo "<option value='".htmlspecialchars($c['category'])."'>".htmlspecialchars($c['category'])."</option>";
+          }
+        ?>
+      </select>
+
+      <button id="clearFilters" class="btn btn-outline-secondary btn-sm">Clear</button>
+    </div>
+
+    <!-- 🧾 Table -->
+    <div class="table-container-scroll">
+      <table class="modern-table" id="accountTable">
+        <thead>
+          <tr>
+            <th>Done</th> 
+            <th>S. No.</th>
+            <th class="sticky-col">Account Name</th>
+            <th>Status</th>
+            <th>User ID</th>
+            <th>Password</th>
+            <th>Assign Date</th>
+            <th>Renewal Date</th>
+            <th>Contact</th>
+            <th>Access ID</th>
+            <th>Email</th>
+            <th>Sales Person</th>
+            <th>Payment</th>
+            <th>Category</th>
+            <th>Comment</th>
+            <th>City</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <?php
+          $sn = 1;
+          $today = date('Y-m-d');
+          $holdAccounts = [];
+
+          while ($row = $accounts->fetch_assoc()) {
+            if (strtolower($row['status']) === 'dead') continue;
+
+            if ($row['renewal_date'] === $today && strtolower($row['status']) !== 'hold') {
+              $updateStmt = $conn->prepare("UPDATE accounts SET status = 'Hold' WHERE id = ?");
+              $updateStmt->bind_param("i", $row['id']);
+              $updateStmt->execute();
+              $row['status'] = 'Hold';
+            }
+
+            if (strtolower($row['status']) === 'hold') {
+              $holdAccounts[] = [
+                'name'    => $row['account_name'] ?? '',
+                'renewal' => $row['renewal_date'] ?? ''
+              ];
+            }
+
+            $status = $row['status'];
+            $statusClass = "status-badge status-" . $status;
+            $accId = (int)$row['id'];
+            $isChecked = !empty($workedToday[$accId]);
+
+            echo "<tr>";
+            echo '<td style="text-align:center;">
+                    <input type="checkbox" class="workcheck" data-id="'.$accId.'" '.($isChecked ? 'checked' : '').'>
+                  </td>';
+            echo "<td>{$sn}</td>";
+
+            $accountNameClass = ($status === 'Hold') ? 'account-name-hold' : '';
+            echo "<td class='sticky-col {$accountNameClass}'>" . htmlspecialchars($row['account_name']) . "</td>";
+            echo "<td><span class='{$statusClass}'>" . htmlspecialchars($status) . "</span></td>";
+            echo "<td>" . htmlspecialchars($row['user_id'] ?? '') . "</td>";
+            echo "<td>" . htmlspecialchars($row['password']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['assign_date']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['renewal_date']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['contact']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['access_id'] ?? '') . "</td>";
+            echo "<td>" . htmlspecialchars($row['email']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['sales_person']) . "</td>";
+            echo "<td>₹" . htmlspecialchars($row['payment']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['category']) . "</td>";
+
+            $comment = htmlspecialchars($row['comment'] ?? '');
+            $commentShort = strlen($comment) > 30 ? substr($comment, 0, 30) . '...' : $comment;
+            echo "<td title='{$comment}'>{$commentShort}</td>";
+
+            echo "<td>" . htmlspecialchars($row['city']) . "</td>";
+            echo "</tr>";
+            $sn++;
+          }
+          ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 🧠 Smart Filter Script -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('accountSearch');
+  const statusFilter = document.getElementById('statusFilter');
+  const categoryFilter = document.getElementById('categoryFilter');
+  const clearBtn = document.getElementById('clearFilters');
+  const rows = document.querySelectorAll('#accountTable tbody tr');
+  const resultCount = document.getElementById('resultCount');
+
+  function filter() {
+    const search = searchInput.value.toLowerCase();
+    const status = statusFilter.value.toLowerCase();
+    const category = categoryFilter.value.toLowerCase();
+    let visible = 0;
+
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const rowStatus = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+      const rowCategory = row.querySelector('td:nth-child(14)').textContent.toLowerCase();
+
+      const okSearch = !search || text.includes(search);
+      const okStatus = !status || rowStatus.includes(status);
+      const okCategory = !category || rowCategory.includes(category);
+
+      if (okSearch && okStatus && okCategory) {
+        row.style.display = '';
+        visible++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    resultCount.textContent = `${visible} result${visible !== 1 ? 's' : ''} shown`;
+  }
+
+  [searchInput, statusFilter, categoryFilter].forEach(el => el.addEventListener('input', filter));
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    statusFilter.value = '';
+    categoryFilter.value = '';
+    filter();
+  });
+
+  filter();
+});
+</script>
+
+<!-- 🔔 Toast container (NEW) -->
+<div id="notify-wrap" style="position:fixed; top:90px; right:24px; z-index:9999;"></div>
+
+<style>
+  .notify-card{
+    background:#fff; border-left:6px solid #f59e0b;
+    padding:14px 16px; border-radius:10px;
+    box-shadow:0 8px 18px rgba(0,0,0,.12);
+    margin-bottom:10px; width:320px; animation:slideIn .35s ease;
+  }
+  .notify-title{font-weight:700; font-size:15px; color:#1f2937; margin-bottom:6px;}
+  .notify-list{margin:0; padding-left:18px; font-size:14px; color:#374151;}
+  .notify-close{background:transparent; border:none; font-size:18px; color:#6b7280; float:right; cursor:pointer;}
+  @keyframes slideIn{from{opacity:0; transform:translateX(30px)} to{opacity:1; transform:translateX(0)}}
+
+  /* Dark theme compatibility */
+  body.dark .notify-card{ background:#1e1e2f; color:#f1f1f1; border-left-color:#f59e0b; }
+  body.dark .notify-title{ color:#fff; }
+  body.dark .notify-list{ color:#e5e7eb; }
+</style>
+
+<script>
+  // Simple toast creator
+  function showToast(title, items){
+    if(!items || !items.length) return;
+    const wrap = document.getElementById('notify-wrap');
+    const id = 'n'+Date.now();
+    const html = `
+      <div class="notify-card" id="${id}">
+        <button class="notify-close" onclick="document.getElementById('${id}').remove()">&times;</button>
+        <div class="notify-title">${title}</div>
+        <ul class="notify-list">
+          ${items.map(x=>`<li>${x.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</li>`).join('')}
+        </ul>
+      </div>`;
+    wrap.insertAdjacentHTML('beforeend', html);
+    setTimeout(()=>{ const el=document.getElementById(id); if(el) el.remove(); }, 12000);
+  }
+</script>
+
+<?php if (!empty($newlyHeld) || !empty($renewalToday)): ?>
+  <script>
+    <?php if(!empty($newlyHeld)): ?>
+      // Aaj hi Hold me gaye
+      showToast('⚠️ Hold me gaye accounts', <?= json_encode($newlyHeld) ?>);
+    <?php endif; ?>
+    <?php if(!empty($renewalToday)): ?>
+      // Aaj Renewal Due
+      showToast('🔔 Aaj Renewal Due', <?= json_encode($renewalToday) ?>);
+    <?php endif; ?>
+  </script>
+<?php endif; ?>
+
+<!-- 💳 Payments: Compact 2-Column (always 50/50) -->
+<style>
+  .form-card-compact{
+    max-width: 620px;          /* chhota form */
+    margin: 44px auto;
+    padding: 18px 16px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.92);
+    border: 1px solid rgba(15,23,42,.08);
+    box-shadow: 0 14px 28px rgba(0,0,0,.12);
+    backdrop-filter: blur(8px);
+  }
+  .form-title{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-weight:800;letter-spacing:.2px}
+  .form-sub{color:#6b7280;margin-bottom:12px;font-size:.92rem}
+
+  /* Always 2 columns (50/50), even on mobile */
+  .form-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 14px; /* row col */
+  }
+  .field{min-width:0}
+  .full{grid-column: 1 / -1}        /* full width rows (e.g. button) */
+
+  .form-label{font-weight:700;font-size:.9rem;color:#111827;margin-bottom:6px}
+  .position-relative{position:relative}
+  .input-icon{
+    position:absolute; inset:0 auto 0 10px;
+    display:grid; place-items:center; width:24px;
+    color:#6b7280; pointer-events:none; font-size:16px;
+  }
+  .with-icon .form-control, .with-icon .form-select{padding-left:36px}
+
+  .form-control, .form-select{
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    padding: .45rem .7rem;
+    font-size: .95rem;
+    box-shadow: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .form-control:focus, .form-select:focus{
+    border-color:#6366f1;
+    box-shadow:0 0 0 .15rem rgba(99,102,241,.14);
+  }
+
+  .currency-prepend{
+    position:absolute; left:10px; top:50%; transform:translateY(-50%);
+    font-weight:700; color:#6b7280;
+  }
+  .with-currency .form-control{padding-left:32px}
+
+  .btn-gradient{
+    background:linear-gradient(90deg,#4f46e5,#06b6d4);
+    border:0; color:#fff; font-weight:800; letter-spacing:.2px;
+    border-radius:12px; padding:.7rem 1rem; width:100%;
+    box-shadow:0 10px 22px rgba(79,70,229,.22);
+  }
+  .btn-gradient:hover{filter:brightness(1.05)}
+
+  /* Dark mode support (if body.dark) */
+  body.dark .form-card-compact{background:rgba(30,32,47,.95);border-color:#2a2f45;color:#e5e7eb}
+  body.dark .form-label{color:#e5e7eb}
+  body.dark .form-control, body.dark .form-select{background:#1f2437;color:#e5e7eb;border-color:#39405a}
+  body.dark .form-control::placeholder{color:#9aa3b2}
+  body.dark .form-sub{color:#9aa3b2}
+  body.dark .input-icon, body.dark .currency-prepend{color:#9aa3b2}
+</style>
+
+
+
+
+
+
+
+
+
+<!-- my keywords--------------------------------------------------- -->
+
+
+
+
+
+<!-- 🔘 My Keywords -->
+<button id="myKeywordsBtn" class="btn-keywords">🏷️ My Keywords</button>
+
+<!-- 📂 Categories Modal -->
+<div id="keywordsModal" class="mk-modal">
+  <div class="mk-card">
+    <div class="mk-head">
+      <h3>My Keywords</h3>
+      <button class="mk-close" id="mkClose">&times;</button>
+    </div>
+
+    <div class="mk-body">
+      <div class="mk-addbar">
+        <input id="mkCategoryInput" type="text" placeholder="Add category (e.g. T-shirt)">
+        <button id="mkAddBtn">Add</button>
+      </div>
+      <ul id="mkList"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- 📝 Note Modal -->
+<div id="noteModal" class="mk-modal">
+  <div class="mk-card">
+    <div class="mk-head">
+      <h3 id="noteTitle">Category</h3>
+      <button class="mk-close" id="noteClose">&times;</button>
+    </div>
+    <div class="mk-body">
+      <textarea id="noteText" placeholder="Write keywords here..."></textarea>
+    </div>
+    <div class="mk-foot">
+      <button id="saveNoteBtn">💾 Save</button>
+      <button id="noteCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+<style>
+/* 🔹 Modern Glass Dashboard Look */
+.mk-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 50px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+}
+
+.mk-card {
+  width: 80%;
+  max-width: 1100px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: zoomIn 0.3s ease;
+}
+@keyframes zoomIn { from{transform:scale(0.97);opacity:0;} to{transform:scale(1);opacity:1;} }
+
+.mk-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: #fff;
+}
+.mk-head h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+.mk-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+}
+.mk-close:hover { background: rgba(255, 255, 255, 0.35); }
+
+.mk-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mk-addbar {
+  display: flex;
+  gap: 10px;
+}
+#mkCategoryInput {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+#mkAddBtn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+#mkAddBtn:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+/* 🔸 Category Grid Layout */
+.mk-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mk-list li {
+  background: linear-gradient(145deg, #f9fafb, #f1f5f9);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  padding: 14px;
+  transition: 0.25s ease;
+  opacity: 0;
+}
+.mk-list li.show { opacity: 1; }
+.mk-list li:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.25);
+  background: #eef2ff;
+}
+.mk-list li span {
+  display: block;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+
+.mk-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.mk-actions button {
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.mk-actions .open {
+  background: #4f46e5;
+  color: #fff;
+}
+.mk-actions .open:hover {
+  background: #4338ca;
+}
+.mk-actions .delete {
+  background: #ef4444;
+  color: #fff;
+}
+.mk-actions .delete:hover {
+  background: #dc2626;
+}
+
+/* 📝 Note Modal */
+.mk-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 16px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+.mk-foot button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+#saveNoteBtn { background: #22c55e; color: #fff; }
+#saveNoteBtn:hover { background: #16a34a; }
+#noteCloseBtn { background: #9ca3af; color: #fff; }
+#noteCloseBtn:hover { background: #6b7280; }
+
+#noteText {
+  width: 100%;
+  height: 260px;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 1rem;
+  resize: vertical;
+  outline: none;
+}
+
+/* Button */
+.btn-keywords {
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 22px;
+  font-weight: 700;
+  cursor: pointer;
+  margin: 15px auto;
+  display: block;
+  box-shadow: 0 4px 10px rgba(59,130,246,0.4);
+  transition: 0.3s;
+}
+.btn-keywords:hover {
+  background: linear-gradient(135deg, #4338ca, #2563eb);
+  transform: translateY(-2px);
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const manager_id = <?= (int)$manager_id ?>;
+  const apiBase = "";
+
+  const btnOpen = document.getElementById("myKeywordsBtn");
+  const modalList = document.getElementById("keywordsModal");
+  const modalNote = document.getElementById("noteModal");
+  const mkList = document.getElementById("mkList");
+  const mkAdd = document.getElementById("mkAddBtn");
+  const mkInput = document.getElementById("mkCategoryInput");
+  const mkClose = document.getElementById("mkClose");
+  const noteClose = document.getElementById("noteClose");
+  const noteCloseBtn = document.getElementById("noteCloseBtn");
+  const noteTitle = document.getElementById("noteTitle");
+  const noteText = document.getElementById("noteText");
+  const saveNoteBtn = document.getElementById("saveNoteBtn");
+  let activeCategory = null;
+
+  // ✅ Open / Close Modals
+  btnOpen.addEventListener("click", () => {
+    modalList.style.display = "flex";
+    loadCategories();
+  });
+  mkClose.addEventListener("click", () => (modalList.style.display = "none"));
+  noteClose.addEventListener("click", () => (modalNote.style.display = "none"));
+  noteCloseBtn.addEventListener("click", () => (modalNote.style.display = "none"));
+
+  // ✅ Add Category
+  mkAdd.addEventListener("click", async () => {
+    const name = mkInput.value.trim();
+    if (!name) return alert("Enter category name");
+    const fd = new FormData();
+    fd.append("manager_id", manager_id);
+    fd.append("name", name);
+    const res = await fetch(apiBase + "add_category.php", { method: "POST", body: fd });
+    const txt = (await res.text()).trim();
+    console.log("Add category response:", txt);
+    if (txt === "success") {
+      mkInput.value = "";
+      loadCategories();
+    } else alert("Error: " + txt);
+  });
+
+  // ✅ Load Categories
+  async function loadCategories() {
+    const res = await fetch(apiBase + "get_categories.php?manager_id=" + manager_id);
+    const cats = await res.json();
+    mkList.innerHTML = "";
+    cats.forEach((c, i) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span>${c.name}</span>
+        <div class="mk-actions">
+          <button class="open" onclick="openNote(${c.id}, '${c.name}')">Open</button>
+          <button class="delete" onclick="deleteCategory(${c.id})">Delete</button>
+        </div>`;
+      mkList.appendChild(li);
+      setTimeout(() => li.classList.add("show"), 50 * i);
+    });
+  }
+
+  // ✅ Delete Category
+  window.deleteCategory = async (id) => {
+    if (!confirm("Delete this category?")) return;
+    const fd = new FormData();
+    fd.append("id", id);
+    fd.append("manager_id", manager_id);
+    const res = await fetch(apiBase + "delete_category.php", { method: "POST", body: fd });
+    console.log("Delete response:", await res.text());
+    loadCategories();
+  };
+
+  // ✅ Open Note
+  window.openNote = async (category_id, name) => {
+    activeCategory = category_id;
+    noteTitle.textContent = name;
+    noteText.value = "";
+    modalNote.style.display = "flex";
+    const res = await fetch(apiBase + "get_note.php?manager_id=" + manager_id + "&category_id=" + category_id);
+    if (res.ok) noteText.value = await res.text();
+  };
+
+  // ✅ Save Note
+  saveNoteBtn.addEventListener("click", async () => {
+    const content = noteText.value;
+    const fd = new FormData();
+    fd.append("manager_id", manager_id);
+    fd.append("category_id", activeCategory);
+    fd.append("content", content);
+    const res = await fetch(apiBase + "save_note.php", { method: "POST", body: fd });
+    console.log("Save note:", await res.text());
+    alert("✅ Note saved!");
+  });
+});
+</script>
+
+
+
+
+
+
+
+
+
+<div class="form-card-compact">
+  <div class="text-center">
+    <div class="form-title text-primary">
+      <i class="ti ti-credit-card" style="font-size:20px"></i>
+      <span>Add New Payment Entry</span>
+    </div>
+    <div class="form-sub">Fill the payment details below carefully</div>
+  </div>
+
+  <form action="add_payment.php" method="POST" class="form-grid">
+    <input type="hidden" name="manager_id" value="<?= $_SESSION['manager_id'] ?>">
+
+    <!-- Row 1 -->
+    <div class="field">
+      <label class="form-label">Account Name</label>
+      <div class="position-relative with-icon">
+        <span class="input-icon"><i class="ti ti-building-store"></i></span>
+        <input type="text" name="account_name" class="form-control" placeholder="Enter Account Name" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="form-label">Seller Mobile Number</label>
+      <div class="position-relative with-icon">
+        <span class="input-icon"><i class="ti ti-device-mobile"></i></span>
+        <input type="text" name="seller_mobile" class="form-control" placeholder="Enter Mobile Number" required>
+      </div>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="field">
+      <label class="form-label">Payment Type</label>
+      <div class="position-relative with-icon">
+        <span class="input-icon"><i class="ti ti-category"></i></span>
+        <select name="payment_type" class="form-select" required>
+          <option value="">Select Type</option>
+          <option value="Listing">Listing</option>
+          <option value="Infographic">Infographic</option>
+          <option value="Renewals">Renewals</option>
+          <option value="Marketing">Marketing</option>
+          <option value="New Account">New Account</option>
+          <option value="A+ Listing">A+ Listing</option>
+          <option value="Brand Store">Brand Store</option>
+          <option value="Video Editing">Video Editing</option>
+          <option value="Website">Website</option>
+          <option value="Social Media">Social Media</option>
+          <option value="Relaunch">Relaunch</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="form-label">Payment Amount (₹)</label>
+      <div class="position-relative with-currency">
+        <span class="currency-prepend">₹</span>
+        <input type="number" name="payment_amount" class="form-control" placeholder="e.g., 1500" required>
+      </div>
+    </div>
+
+    <!-- Row 3 -->
+    <div class="field">
+      <label class="form-label">Payment Status</label>
+      <div class="position-relative with-icon">
+        <span class="input-icon"><i class="ti ti-status-change"></i></span>
+        <select name="payment_status" class="form-select" required>
+          <option value="Active">Active</option>
+          <option value="Draft">Draft</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="form-label">Payment Date</label>
+      <div class="position-relative with-icon">
+        <span class="input-icon"><i class="ti ti-calendar"></i></span>
+        <input type="date" name="payment_date" class="form-control" required>
+      </div>
+    </div>
+
+    <!-- Row 4 -->
+    <div class="field">
+      <label class="form-label">Submission Date</label>
+      <div class="position-relative with-icon">
+        <span class="input-icon"><i class="ti ti-calendar-check"></i></span>
+        <input type="date" name="submission_date" class="form-control">
+      </div>
+    </div>
+
+    <div class="field"><!-- spacer to keep 50/50 rows aligned --></div>
+
+    <!-- Submit -->
+    <div class="full mt-1">
+      <button type="submit" class="btn btn-gradient">
+        <i class="ti ti-cash me-1"></i> Add Payment
+      </button>
+    </div>
+  </form>
+</div>
+
+
+
+
+
+<?php
+
+// ====== MONTH FILTER (default: current IST month) ======
+$selectedMonth = (isset($_GET['m']) && preg_match('/^\d{4}-\d{2}$/', $_GET['m']))
+  ? $_GET['m']
+  : date('Y-m'); // Asia/Kolkata honi chahiye (ensure connect1.php me timezone set hai)
+
+$start = $selectedMonth . '-01 00:00:00';
+$end   = date('Y-m-d H:i:s', strtotime($start . ' +1 month'));
+
+// ====== VIEW SCOPE DECISION ======
+$isAdminSession = !empty($_SESSION['is_admin']) && (int)$_SESSION['is_admin'] === 1;
+$isAdminPage    = (basename($_SERVER['PHP_SELF']) === 'admin_dashboard.php');
+$forceMyScope   = (isset($_GET['scope']) && $_GET['scope'] === 'me');
+$adminView      = $isAdminSession && $isAdminPage && !$forceMyScope;
+
+$managerId = (int)($_SESSION['manager_id'] ?? 0);
+
+// ====== FETCH PAYMENTS (range-based; uses index on payment_date) ======
+if ($adminView) {
+  // Admin: sab managers, selected month range
+  $sqlPay = "
+    SELECT p.*, m.name AS manager_name
+    FROM payments p
+    JOIN managers m ON m.id = p.manager_id
+    WHERE p.payment_date >= ? AND p.payment_date < ?
+    ORDER BY p.payment_date DESC, p.id DESC
+  ";
+  $stmtPay = $conn->prepare($sqlPay);
+  $stmtPay->bind_param("ss", $start, $end);
+} else {
+  // Manager/self view
+  $sqlPay = "
+    SELECT p.*, m.name AS manager_name
+    FROM payments p
+    JOIN managers m ON m.id = p.manager_id
+    WHERE p.manager_id = ? 
+      AND p.payment_date >= ? AND p.payment_date < ?
+    ORDER BY p.payment_date DESC, p.id DESC
+  ";
+  $stmtPay = $conn->prepare($sqlPay);
+  $stmtPay->bind_param("iss", $managerId, $start, $end);
+}
+
+$stmtPay->execute();
+$paymentsRes = $stmtPay->get_result();
+
+// Month total
+$totalAmount = 0;
+$rows = [];
+while ($r = $paymentsRes->fetch_assoc()) {
+  $rows[] = $r;
+  $totalAmount += (float)$r['payment_amount'];
+}
+
+?>
+
+
+<?php
+// Fallback: agar $isAdmin upar define nahi hai to yahin calc kar lo
+$isAdmin = $isAdmin ?? (!empty($_SESSION['is_admin']) && (int)$_SESSION['is_admin'] === 1);
+?>
+
+<!-- 🔎 Month Filter -->
+<form class="d-flex align-items-center gap-2 mb-3" method="get" action="">
+  <label class="form-label mb-0">Select Month:</label>
+  <input type="month" name="m" class="form-control" style="max-width:220px"
+         value="<?= htmlspecialchars($selectedMonth) ?>"
+         onchange="this.form.submit()">
+  <?php if (!($isAdmin ?? false)): ?>
+    <!-- manager dashboard par koi extra field nahi chahiye -->
+  <?php endif; ?>
+</form>
+
+<div class="glass-card mt-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+<h4 class="text-primary fw-bold mb-0">
+  💳 Payments (<?= htmlspecialchars(date('F Y', strtotime($selectedMonth.'-01'))) ?>)
+</h4>
+    <div class="badge bg-dark-subtle text-dark p-2">
+      Month Total: <strong>₹<?= number_format($totalAmount) ?></strong>
+    </div>
+  </div>
+
+  <div class="table-container-scroll">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Payment Date</th>
+          <th>Account Name</th>
+          <th>Payment Type</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Manager</th>
+          <th>Seller Mobile</th>
+          <th>Submission Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+      <?php if (empty($rows)): ?>
+        <tr><td colspan="10" class="text-center">No payments found for this month.</td></tr>
+      <?php else: ?>
+        <?php $sn = 1; foreach ($rows as $row): 
+          $statusColor = ($row['payment_status'] === 'Active') ? 'badge bg-success' :
+                         (($row['payment_status'] === 'Achieved') ? 'badge bg-primary' : 'badge bg-secondary');
+        ?>
+          <tr>
+            <td><?= $sn++ ?></td>
+            <td><?= htmlspecialchars($row['payment_date']) ?></td>
+            <td><?= htmlspecialchars($row['account_name']) ?></td>
+            <td><?= htmlspecialchars($row['payment_type']) ?></td>
+            <td><strong>₹<?= htmlspecialchars($row['payment_amount']) ?></strong></td>
+            <td><span class="<?= $statusColor ?>"><?= htmlspecialchars($row['payment_status']) ?></span></td>
+            <td><?= htmlspecialchars($row['manager_name']) ?></td>
+            <td><?= htmlspecialchars($row['seller_mobile']) ?></td>
+            <td><?= htmlspecialchars($row['submission_date']) ?></td>
+            <td>
+              <a href="edit_payment.php?id=<?= $row['id'] ?>" class="btn btn-outline-primary btn-sm me-1">
+                <i class="ti ti-pencil"></i>
+              </a>
+              <a href="delete_payment.php?id=<?= $row['id'] ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this payment?')">
+                <i class="ti ti-trash"></i>
+              </a>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+      <?php endif; ?>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<?php
+// 🔴 DEAD LEADS SECTION (same manager_id, status = 'Dead')
+$deadQuery = $conn->prepare("SELECT * FROM accounts WHERE manager_id = ? AND status = 'Dead'");
+$deadQuery->bind_param("i", $_SESSION['manager_id']);
+$deadQuery->execute();
+$deadResult = $deadQuery->get_result();
+
+// 🧠 Fetch all other managers (for reassign dropdown)
+$teamMembers = [];
+$tq = $conn->prepare("SELECT id, name FROM managers WHERE id != ?");
+$tq->bind_param("i", $_SESSION['manager_id']);
+$tq->execute();
+$resT = $tq->get_result();
+while ($r = $resT->fetch_assoc()) {
+  $teamMembers[] = $r;
+}
+?>
+
+<div class="glass-card mt-5">
+  <h4 class="text-danger fw-bold mb-3">💀 Dead Leads</h4>
+
+  <div class="table-container-scroll">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Account Name</th>
+          <th>Assign Date</th>
+          <th>Renewal Date</th>
+          <th>Payment</th>
+          <th>Sales Person</th>
+          <th>Email</th>
+          <th>User ID</th>
+          <th>Password</th>
+          <th>Contact</th>
+          <th>City</th>
+          <th>Category</th>
+          <th>Status</th>
+          <th>Comment</th>
+          <th>Access ID</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <?php 
+        $sn = 1;
+        while($row = $deadResult->fetch_assoc()) {
+          $statusClass = "status-badge status-" . strtolower($row['status']);
+          $comment = htmlspecialchars($row['comment'] ?? '');
+          $commentShort = strlen($comment) > 30 ? substr($comment, 0, 30) . '...' : $comment;
+          $accId = (int)$row['id'];
+
+          echo "<tr id='dead-row-{$accId}'>";
+          echo "<td>{$sn}</td>";
+          echo "<td>" . htmlspecialchars($row['account_name']) . "</td>";
+          echo "<td>" . htmlspecialchars($row['assign_date']) . "</td>";
+          echo "<td>" . htmlspecialchars($row['renewal_date']) . "</td>";
+          echo "<td>₹" . htmlspecialchars($row['payment']) . "</td>";
+          echo "<td>" . htmlspecialchars($row['sales_person']) . "</td>";
+          echo "<td>" . htmlspecialchars($row['email']) . "</td>";
+          echo "<td>" . htmlspecialchars($row['user_id']) . "</td>";
+          echo "<td>" . htmlspecialchars($row['password']) . "</td>";
+          echo "<td>" . htmlspecialchars($row['contact']) . "</td>";
+          echo "<td>" . htmlspecialchars($row['city']) . "</td>";
+          echo "<td>" . htmlspecialchars($row['category']) . "</td>";
+          echo "<td><span class='{$statusClass}'>" . htmlspecialchars($row['status']) . "</span></td>";
+          echo "<td title='{$comment}'>{$commentShort}</td>";
+          echo "<td>" . htmlspecialchars($row['access_id']) . "</td>";
+
+          echo "<td class='d-flex gap-2 align-items-center'>";
+          // 🗑 Delete
+          echo "<form action='delete_account.php' method='POST' 
+                    onsubmit=\"return confirm('⚠️ Permanently delete this account? This cannot be undone.')\">
+                    <input type='hidden' name='csrf' value='{$CSRF}'>
+                    <input type='hidden' name='id' value='{$accId}'>
+                    <button type='submit' class='btn btn-outline-danger btn-sm'>
+                      <i class='ti ti-trash'></i>
+                    </button>
+                </form>";
+
+          // 🔁 Reassign dropdown
+          echo "<select class='form-select form-select-sm reassign-select' 
+                        data-id='{$accId}' style='min-width:140px'>
+                  <option value=''>Reassign...</option>
+                  <option value='self'>➡️ Self</option>";
+          foreach($teamMembers as $tm){
+            echo "<option value='{$tm['id']}'>" . htmlspecialchars($tm['name']) . "</option>";
+          }
+          echo "</select>";
+
+          echo "</td></tr>";
+          $sn++;
+        }
+        ?>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 🧠 AJAX Reassign Script -->
+<script>
+document.addEventListener('change', async function(e){
+  const sel = e.target.closest('.reassign-select');
+  if(!sel) return;
+  const id = sel.dataset.id;
+  const to = sel.value;
+  if(!to) return;
+
+  const name = to === 'self' ? 'yourself' : sel.options[sel.selectedIndex].text;
+  if(!confirm(`Reassign this account to ${name}?`)){
+    sel.value = '';
+    return;
+  }
+
+  try {
+    const res = await fetch('reassign_account.php', {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({
+        id, to, csrf: <?= json_encode($CSRF) ?>
+      })
+    });
+    const j = await res.json();
+    if(j.ok){
+      const row = document.getElementById('dead-row-'+id);
+      row.style.transition='opacity .4s ease';
+      row.style.opacity='0.3';
+      setTimeout(()=>row.remove(),400);
+      alert('✅ ' + j.msg);
+    } else {
+      alert('❌ ' + j.msg);
+      sel.value = '';
+    }
+  } catch(err){
+    alert('⚠️ Network error. Try again.');
+  }
+});
+</script>
+
+
+  <?php if (!empty($renewalTodayAccounts)): ?>
+<div id="renewal-toast" class="renewal-toast shadow-lg">
+  <strong class="toast-title">🔔 Renewals Due Today</strong>
+  <ul class="toast-list mt-2 mb-0">
+    <?php foreach ($renewalTodayAccounts as $account): ?>
+      <li><?= htmlspecialchars($account) ?></li>
+    <?php endforeach; ?>
+  </ul>
+  <button class="toast-close" onclick="document.getElementById('renewal-toast').style.display='none'">&times;</button>
+</div>
+<?php endif; ?>
+
+
+
+  <!-- 🌑 Theme Script -->
+ <script>
+document.addEventListener('DOMContentLoaded', function () {
+  const toggle = document.getElementById('themeToggle');
+  if (toggle) toggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark'); // tum upar 'dark' class use kar rahe ho
+  });
+});
+</script>
+
+    <script>
+      function toggleTheme() {
+        document.body.classList.toggle('dark');
+      }
+    </script>
+    
+    <script>
+  function loadAccountData(accountId) {
+    fetch('get_account_data.php?id=' + accountId)
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('editFormFields');
+        container.innerHTML = `
+          <div class="col-md-6">
+            <label class="form-label">Account Name</label>
+            <input type="text" class="form-control" name="account_name" value="${data.account_name}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Assign Date</label>
+            <input type="date" class="form-control" name="assign_date" value="${data.assign_date}">
+          </div>
+          <!-- Add remaining fields similarly -->
+        `;
+      });
+  }
+  </script>
+
+  <script>
+  /* Initialize Particles */
+  particlesJS("particles-js", {
+    "particles": {
+      "number": {
+        "value": 60,
+        "density": {
+          "enable": true,
+          "value_area": 800
+        }
+      },
+      "color": { "value": "#4f46e5" },
+      "shape": {
+        "type": "circle",
+        "stroke": { "width": 0, "color": "#000000" },
+        "polygon": { "nb_sides": 5 }
+      },
+      "opacity": {
+        "value": 0.3,
+        "random": true,
+        "anim": { "enable": false }
+      },
+      "size": {
+        "value": 4,
+        "random": true,
+        "anim": { "enable": false }
+      },
+      "line_linked": {
+        "enable": true,
+        "distance": 150,
+        "color": "#a5b4fc",
+        "opacity": 0.25,
+        "width": 1
+      },
+      "move": {
+        "enable": true,
+        "speed": 2,
+        "direction": "none",
+        "random": false,
+        "straight": false,
+        "out_mode": "out"
+      }
+    },
+    "interactivity": {
+      "detect_on": "canvas",
+      "events": {
+        "onhover": { "enable": true, "mode": "repulse" },
+        "onclick": { "enable": false }
+      },
+      "modes": {
+        "repulse": { "distance": 100 }
+      }
+    },
+    "retina_detect": true
+  });
+</script>
+<script>
+(function(){
+  const CSRF = <?= json_encode($CSRF) ?>;
+
+  // Optimistic save: UI pe turant reflect, backend fail par revert
+  document.addEventListener('change', function(e){
+    const cb = e.target.closest('.workcheck');
+    if (!cb) return;
+
+    const accId = cb.getAttribute('data-id');
+    const val = cb.checked ? 1 : 0;
+
+    // optimistic: keep current state, but keep a backup
+    const prev = !val;
+
+    fetch('toggle_work.php', {
+      method: 'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      credentials: 'same-origin',
+      body: new URLSearchParams({ id: accId, val: val, csrf: CSRF })
+    })
+    .then(r => r.json())
+    .then(j => {
+      if (!j.ok) throw new Error(j.msg || 'Failed');
+      // success — do nothing
+    })
+    .catch(err => {
+      // revert UI
+      cb.checked = prev;
+      // tiny toast
+      const m = document.createElement('div');
+      m.textContent = 'Save failed. Try again.';
+      m.style = 'position:fixed;bottom:16px;left:16px;background:#ef4444;color:#fff;padding:8px 12px;border-radius:8px;z-index:9999';
+      document.body.appendChild(m);
+      setTimeout(()=>m.remove(), 2200);
+    });
+  });
+})();
+</script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle=\"tooltip\"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+  })
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" integrity="sha384-7qAoOXltbVP82dhxHAUje59V5r2YsVfBafyUDxEdApLPmcdhBPg1DKg1ERo0BZlK" crossorigin="anonymous"></script>
+<?php include __DIR__ . '/shoutouts_widget.php'; ?>
+
+
+
+
+
+
+
+
+</body>
+  </html>
