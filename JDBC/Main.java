@@ -1,12 +1,4 @@
 package JDBC;
-
-/* Main.java
-   Real Estate Property Management System (single-file)
-   - Java 8+
-   - Requires MySQL JDBC driver in classpath
-   - Edit DB_URL, DB_USER, DB_PASS below
-*/
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
