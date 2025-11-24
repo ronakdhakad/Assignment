@@ -1,87 +1,48 @@
-
 package SwingProject1.real_estate_project;
-import javax.swing.*;
-import java.sql.*;
+import SwingProject1.real_estate_project.util.ValidationUtil;
+import javax.swing.*; import java.awt.*; import java.sql.*;
 
 public class LoginPage extends JFrame {
+  private final JTextField email=new JTextField();
+  private final JPasswordField password=new JPasswordField();
+  private final JButton login=new JButton("Login");
 
-    private JTextField emailField;
-    private JPasswordField passwordField;
-    private JButton loginButton, clearButton;
-    private JLabel messageLabel;
+  public LoginPage(){
+    super("Broker Login");
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setSize(420,240); setLocationRelativeTo(null);
+    setLayout(new BorderLayout(10,10));
+    JPanel form=new JPanel(new GridLayout(4,2,8,8));
+    form.add(new JLabel("Email")); form.add(email);
+    form.add(new JLabel("Password")); form.add(password);
+    JLabel hint=new JLabel("<html><small>Password: 8+ chars, upper, lower, digit, special</small></html>");
+    form.add(hint); form.add(new JLabel());
+    form.add(new JLabel()); form.add(login);
+    add(form, BorderLayout.CENTER);
+    login.addActionListener(a -> doLogin());
+  }
 
-    public LoginPage() {
-        setTitle("Broker Login - Real Estate System");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
-        setLocation(200,150);
+  private void doLogin(){
+    try{
+      String em=email.getText().trim();
+      String pw=new String(password.getPassword());
+      // Regex validation
+      ValidationUtil.email(em);
+      ValidationUtil.passwordStrong(pw);
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createEmptyBorder(40, 80, 40, 80));
-
-     
-        JLabel title = new JLabel("Broker Login", SwingConstants.CENTER);
-        title.setAlignmentX(CENTER_ALIGNMENT);
-
-        JLabel emailLabel = new JLabel("Email:");
-        emailField = new JTextField(50);
-
-        JLabel passwordLabel = new JLabel("Password:");
-        passwordField = new JPasswordField(50);
-
-        loginButton = new JButton("Login");
-        clearButton = new JButton("Clear");
-        
-        loginButton.addActionListener(e -> login());
-        clearButton.addActionListener(e -> {
-            emailField.setText("");
-            passwordField.setText("");
-            messageLabel.setText("");
-        });
-
-        messageLabel = new JLabel("", SwingConstants.CENTER);
-        messageLabel.setAlignmentX(CENTER_ALIGNMENT);
-
-        panel.add(title);
-        panel.add(Box.createVerticalStrut(25));
-        panel.add(emailLabel);
-        panel.add(emailField);
-        panel.add(Box.createVerticalStrut(25));
-        panel.add(passwordLabel);
-        panel.add(passwordField);
-        panel.add(Box.createVerticalStrut(50));
-        panel.add(loginButton);
-        panel.add(Box.createVerticalStrut(25));
-        panel.add(clearButton);
-        panel.add(Box.createVerticalStrut(25));
-        panel.add(messageLabel);
-
-        add(panel);
-        setVisible(true);
+      String sql="SELECT id FROM users WHERE email=? AND password_hash=?";
+      try(Connection conn=DBConnection.getConnection(); PreparedStatement ps=conn.prepareStatement(sql)){
+        ps.setString(1,em); ps.setString(2,pw);
+        ResultSet rs=ps.executeQuery();
+        if(rs.next()){ dispose(); new Dashboard().setVisible(true);}
+        else { JOptionPane.showMessageDialog(this,"Invalid credentials"); }
+      }
+    } catch(IllegalArgumentException ex){
+      JOptionPane.showMessageDialog(this, ex.getMessage(), "Validation", JOptionPane.WARNING_MESSAGE);
+    } catch(Exception e){
+      JOptionPane.showMessageDialog(this, e.getMessage());
     }
+  }
 
-    private void login() {
-        String email = emailField.getText();
-        String password = new String(passwordField.getPassword());
-
-        try (Connection conn = DBConnection.getConnection()) {
-            if (conn != null) {
-                PreparedStatement ps = conn.prepareStatement(
-                        "SELECT * FROM broker_login WHERE email=? AND password=?");
-                ps.setString(1, email);
-                ps.setString(2, password);
-                ResultSet rs = ps.executeQuery();
-
-                if (rs.next()) {
-                    messageLabel.setText("Login Successful!");
-                    new Dashboard();
-                } else {
-                    messageLabel.setText("Invalid Email or Password!");
-                }
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
-        }
-    }
+  public static void main(String[] args){ SwingUtilities.invokeLater(() -> new LoginPage().setVisible(true)); }
 }
