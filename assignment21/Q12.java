@@ -1,10 +1,6 @@
 // 12. Write a Java program to extract a portion of an array list.
 import java.util.ArrayList;
-import java.util.List;
-public class Q12 {
-    public static void main(String[] args) {
-        ArrayList<String> fruit=new ArrayList<>();
-        fruit.add("apple");
+git 
         fruit.add("tomato");
         fruit.add("cherry");
         fruit.add("mango");
