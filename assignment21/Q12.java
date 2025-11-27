@@ -1,6 +1,5 @@
 // 12. Write a Java program to extract a portion of an array list.
 import java.util.ArrayList;
-git 
         fruit.add("tomato");
         fruit.add("cherry");
         fruit.add("mango");
